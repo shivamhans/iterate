@@ -1,4 +1,4 @@
-import { readProviderConfig, type ProviderId } from "./providerSettings";
+import { readProviderConfig } from "./providerSettings";
 
 export type InterviewOption = { id: string; label: string; description?: string };
 export type InterviewQuestion = {
