@@ -100,7 +100,9 @@ export async function generateInterviewDecision(context: InterviewContext, model
   if (!provider) throw new Error("Choose and save an AI provider in AI providers before starting an interview.");
   const settings = config.providers[provider];
   if (!settings?.apiKey) throw new Error("The selected provider has no saved API key. Reconnect it in AI providers.");
-  // Compact context reduces repeated whitespace and omits UI-only question metadata.\n  const compactTurns = context.turns.map((turn, index) => ({ n: index + 1, section: turn.question.section, q: turn.question.title, a: turn.answer, ...(turn.customAnswer ? { custom: turn.customAnswer } : {}) }));\n  const prompt = `IDEA\\n${context.idea}\\n\\nKNOWLEDGE\\n${context.knowledgeLevel}\\n\\nANSWERS (oldest first)\\n${JSON.stringify(compactTurns)}\\n\\nCURRENT SPECIFICATION (preserve confirmed facts; update only with supported information)\\n${JSON.stringify(context.specification)}\\n\\nChoose the single highest-value next question or recommend review when requirements are sufficiently clear. Return only the required JSON.`;
+  // Compact context reduces repeated whitespace and omits UI-only question metadata.
+  const compactTurns = context.turns.map((turn, index) => ({ n: index + 1, section: turn.question.section, q: turn.question.title, a: turn.answer, ...(turn.customAnswer ? { custom: turn.customAnswer } : {}) }));
+  const prompt = `IDEA\n${context.idea}\n\nKNOWLEDGE\n${context.knowledgeLevel}\n\nANSWERS (oldest first)\n${JSON.stringify(compactTurns)}\n\nCURRENT SPECIFICATION (preserve confirmed facts; update only with supported information)\n${JSON.stringify(context.specification)}\n\nChoose the single highest-value next question or recommend review when requirements are sufficiently clear. Return only the required JSON.`;
   let raw: string;
   try {
     const model = modelOverride?.model || (settings.modelMode === "manual" ? settings.model : "");
