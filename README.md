@@ -2,7 +2,7 @@
 
 Iterate is a local-first Chrome extension that turns rough ideas into structured specifications and AI-ready prompts.
 
-> **Current status:** UI foundation plus local project management. Users can create, view, edit, and delete projects; project records persist in the browser with IndexedDB. AI provider connections, the adaptive interview, specification editor, and prompt generation are not implemented yet.
+> **Current status:** UI foundation, local project management, and AI provider key management. Users can create, view, edit, and delete projects; configure OpenAI, Gemini, and Anthropic API keys; and test provider connectivity. The adaptive interview, specification editor, and prompt generation are not implemented yet.
 
 ## Product principles
 
@@ -107,7 +107,19 @@ Open the local URL printed in the terminal. This is useful for quick UI work, bu
 
 Projects are stored in IndexedDB inside the extension's browser profile. Clearing Chrome's extension/site data or uninstalling the extension may remove local project data; export/backup is not implemented yet.
 
-AI-key setup, provider calls, adaptive questioning, image analysis, specification editing, prompt generation, version history, and JSON backup/restore are still planned work. Do not enter a real API key yet.
+Provider configuration is available under **AI providers**. You can save a key locally, test it against the selected provider's models endpoint, choose automatic or manual model mode, select the provider to use, or remove its saved key. Connection tests only verify API-key access; they do not yet generate AI responses. The adaptive interview, image analysis, specification editing, prompt generation, version history, and JSON backup/restore are still planned work.
+
+## Test AI provider configuration
+
+1. Open the Iterate workspace and choose **AI providers** in the sidebar.
+2. Paste an API key for one provider. Use a key created in that provider's official developer console; API usage may incur charges.
+3. Click **Test connection**. Iterate sends a small HTTPS request directly to that provider's models-list endpoint. It does not send a prompt or generate a response.
+4. Click **Save key** to store the key in `chrome.storage.local` for this extension profile.
+5. Choose automatic model mode or manual mode. In manual mode, enter a model ID supported by your provider account.
+6. Click **Use this provider** to save the selected provider.
+7. Use the trash icon to remove a saved key.
+
+**Security:** keys are stored locally by Chrome but are not encrypted by Iterate and Chrome local storage is not a hardware-backed secrets vault. Do not use a key on a shared or untrusted browser profile. The key is not sent to Iterate servers because Iterate has no backend; provider requests are direct from the extension. Never paste keys into issues, screenshots, or chat messages.
 
 ## Architecture and product docs
 
