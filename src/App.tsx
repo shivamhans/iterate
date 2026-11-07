@@ -44,6 +44,18 @@ function App() {
     window.setTimeout(() => setToast(""), 3200);
   }
 
+  function beginNewProject() {
+    setEditingProject(null);
+    setIdea("");
+    setShowNew(true);
+  }
+
+  function closeProjectModal() {
+    setShowNew(false);
+    setEditingProject(null);
+    setIdea("");
+  }
+
   function openProject(project: Project) {
     setEditingProject(project);
     setIdea(project.initialIdea);
@@ -125,16 +137,16 @@ function App() {
             })}
           </nav>
           <div className="sidebar-divider"/>
-          <div className="workspace-label project-label">RECENT PROJECTS <button className="tiny-icon" onClick={() => setShowNew(true)} aria-label="Create project"><Plus size={14}/></button></div>
+          <div className="workspace-label project-label">RECENT PROJECTS <button className="tiny-icon" onClick={beginNewProject} aria-label="Create project"><Plus size={14}/></button></div>
           <div className="sidebar-projects">
-            {projects.slice(0, 4).map(p => <button key={p.id} className="side-project" onClick={() => setActive("My projects")}><span className="project-glyph">{p.icon}</span><span>{p.name}</span></button>)}
+            {projects.slice(0, 4).map(p => <button key={p.id} className="side-project" onClick={() => { setActive("My projects"); openProject(p); }}><span className="project-glyph">{p.icon}</span><span>{p.name}</span></button>)}
           </div>
           <div className="sidebar-spacer"/>
           <div className="plan-card">
             <div className="plan-orb"><Sparkles size={20}/></div>
             <div className="plan-title">Your ideas, in orbit.</div>
             <p>Everything starts with a thought. Let's make it clearer.</p>
-            <button onClick={() => setShowNew(true)}>Start creating <ArrowRight size={14}/></button>
+            <button onClick={beginNewProject}>Start creating <ArrowRight size={14}/></button>
           </div>
           <button className="nav-item settings-link" onClick={() => setActive("Settings")}><Settings2 size={17}/><span>Settings</span></button>
           <div className="profile-row">
@@ -161,7 +173,7 @@ function App() {
                   <h1>Make room for <span>big ideas.</span></h1>
                   <p className="welcome-subtitle">A little clarity goes a long way. What are we building today?</p>
                 </div>
-                <button className="primary-button header-cta" onClick={() => setShowNew(true)}><Plus size={16}/> New iteration</button>
+                <button className="primary-button header-cta" onClick={beginNewProject}><Plus size={16}/> New iteration</button>
               </section>
 
               <section className="hero-compose glass-card">
@@ -182,18 +194,19 @@ function App() {
 
               <section className="metrics-grid">
                 <Metric icon={<Layers3/>} label="Active projects" value={String(projects.length).padStart(2,"0")} note="Your ideas in progress" tone="violet" />
-                <Metric icon={<MessageSquareText/>} label="Ideas captured" value="08" note="+2 this week" tone="blue"/>
-                <Metric icon={<Gauge/>} label="Specifications" value="04" note="Ready to build on" tone="pink"/>
-                <Metric icon={<Zap/>} label="Prompt formats" value="07" note="One idea, many outputs" tone="gold"/>
+                <Metric icon={<MessageSquareText/>} label="Ideas captured" value={String(projects.length).padStart(2,"0")} note="Saved on this device" tone="blue"/>
+                <Metric icon={<Gauge/>} label="Specifications" value="00" note="Not generated yet" tone="pink"/>
+                <Metric icon={<Zap/>} label="Prompt formats" value="07" note="Available output styles" tone="gold"/>
               </section>
 
               <section className="content-grid">
                 <div className="panel glass-card activity-panel">
                   <div className="panel-heading"><div><div className="section-kicker">YOUR WORKSPACE</div><h3>Recent projects</h3></div><button className="text-button" onClick={() => setActive("My projects")}>View all <ArrowRight size={14}/></button></div>
                   <div className="project-list">
-                    {projects.slice(0,3).map((p,i) => <ProjectRow key={p.id} project={p} index={i} onOpen={() => setActive("My projects")}/>)}
+                    {projects.slice(0,3).map((p,i) => <ProjectRow key={p.id} project={p} index={i} onOpen={() => openProject(p)}/>)}
+                    {!projectsLoading && projects.length===0 && <div className="empty-state compact-empty"><FolderKanban size={22}/><h3>Your first idea starts here</h3><p>Create a project and it will appear here.</p></div>}
                   </div>
-                  <button className="new-project-row" onClick={() => setShowNew(true)}><span><Plus size={16}/></span> Start with a new idea</button>
+                  <button className="new-project-row" onClick={beginNewProject}><span><Plus size={16}/></span> Start with a new idea</button>
                 </div>
                 <div className="panel glass-card insight-panel">
                   <div className="panel-heading"><div><div className="section-kicker">A BETTER WAY TO THINK</div><h3>How Iterate works</h3></div><div className="mini-spark"><Sparkles size={16}/></div></div>
@@ -209,10 +222,11 @@ function App() {
             </>}
 
             {active === "My projects" && <section className="subpage">
-              <div className="page-heading"><div><div className="eyebrow">YOUR WORK, ALL IN ONE PLACE</div><h1>My <span>projects.</span></h1><p>Every idea has a place to grow.</p></div><button className="primary-button" onClick={() => setShowNew(true)}><Plus size={16}/> New project</button></div>
+              <div className="page-heading"><div><div className="eyebrow">YOUR WORK, ALL IN ONE PLACE</div><h1>My <span>projects.</span></h1><p>Every idea has a place to grow.</p></div><button className="primary-button" onClick={beginNewProject}><Plus size={16}/> New project</button></div>
               <div className="filter-row"><div className="search-field"><Search size={16}/><input placeholder="Find a project..." value={search} onChange={e => setSearch(e.target.value)}/></div><button className="filter-button">Recently edited <ChevronDown size={14}/></button></div>
-              <div className="projects-grid">{filtered.map((p,i)=><ProjectCard key={p.id} project={p} index={i} onOpen={() => setToast("Project workspace is coming next.")}/>)}</div>
-              {filtered.length===0 && <div className="empty-state"><FolderKanban size={25}/><h3>No projects found</h3><p>Try another search or start a new idea.</p></div>}
+              <div className="projects-grid">{filtered.map((p,i)=><ProjectCard key={p.id} project={p} index={i} onOpen={() => openProject(p)}/>)}</div>
+              {!projectsLoading && filtered.length===0 && <div className="empty-state"><FolderKanban size={25}/><h3>{search ? "No projects found" : "Your workspace is ready"}</h3><p>{search ? "Try another search or start a new idea." : "Create your first project to give your idea a home."}</p><button className="primary-button" onClick={beginNewProject}><Plus size={15}/> Create your first project</button></div>}
+              {projectsLoading && <div className="empty-state"><p>Loading your local projects…</p></div>}
             </section>}
 
             {active === "New iteration" && <section className="subpage iteration-page">
@@ -234,7 +248,7 @@ function App() {
       </div>
 
       {sidebarOpen && <button className="mobile-scrim" onClick={()=>setSidebarOpen(false)} aria-label="Close navigation"/>}
-      {showNew && <div className="modal-scrim" onMouseDown={e=>{if(e.target===e.currentTarget)setShowNew(false);}}><div className="new-modal glass-card"><button className="modal-close icon-button" onClick={()=>setShowNew(false)}><X size={18}/></button><div className="modal-icon"><Sparkles size={20}/></div><div className="eyebrow">A FRESH START</div><h2>What's the idea?</h2><p>It doesn't need to be polished. Just get it out of your head.</p><textarea autoFocus value={idea} onChange={e=>setIdea(e.target.value)} placeholder="I want to build, launch, explore..." rows={4}/><div className="modal-actions"><button className="secondary-button" onClick={()=>setShowNew(false)}>Cancel</button><button className="primary-button" onClick={startIteration}>Create project <ArrowRight size={15}/></button></div></div></div>}
+      {showNew && <div className="modal-scrim" onMouseDown={e=>{if(e.target===e.currentTarget)closeProjectModal();}}><div className="new-modal glass-card"><button className="modal-close icon-button" onClick={closeProjectModal}><X size={18}/></button><div className="modal-icon"><Sparkles size={20}/></div><div className="eyebrow">{editingProject ? "YOUR PROJECT" : "A FRESH START"}</div><h2>{editingProject ? "Edit your idea." : "What’s the idea?"}</h2><p>{editingProject ? "Update the starting point for this project." : "It doesn’t need to be polished. Just get it out of your head."}</p><textarea autoFocus value={idea} onChange={e=>setIdea(e.target.value)} placeholder="I want to build, launch, explore..." rows={4}/><div className="modal-actions">{editingProject && <button className="secondary-button danger-button" onClick={deleteCurrentProject}>Delete</button>}<button className="secondary-button" onClick={closeProjectModal}>Cancel</button><button className="primary-button" onClick={startIteration}>{editingProject ? "Save changes" : "Create project"} <ArrowRight size={15}/></button></div></div></div>}
       {showSearch && <div className="modal-scrim search-scrim" onMouseDown={e=>{if(e.target===e.currentTarget)setShowSearch(false);}}><div className="search-modal glass-card"><Search size={18}/><input autoFocus placeholder="Search your projects..." value={search} onChange={e=>setSearch(e.target.value)}/><kbd>ESC</kbd><div className="search-results">{filtered.map(p=><button key={p.id} onClick={()=>{setActive("My projects");setShowSearch(false);}}><span className="project-glyph">{p.icon}</span>{p.name}<ArrowUpRight size={14}/></button>)}{filtered.length===0&&<p>No matching projects.</p>}</div></div></div>}
       {toast && <div className="toast"><Check size={15}/>{toast}</div>}
     </div>
