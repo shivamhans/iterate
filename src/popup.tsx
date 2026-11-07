@@ -12,7 +12,7 @@ function Popup() {
   };
   return <main className="popup-shell">
     <div className="popup-glow"/>
-    <div className="popup-brand"><span className="brand-mark"><span/><span/><span/></span><b>iterate<span className="brand-period">.</span></b></div>
+    <div className="popup-brand"><span className="brand-mark"><span/><span/><span/></span><b><span className="brand-initial">i</span>terate<span className="brand-period">.</span></b></div>
     <div className="eyebrow"><Sparkles size={12}/> A LITTLE CLARITY GOES A LONG WAY</div>
     <h1>What's your <span>big idea?</span></h1>
     <p>Start rough. We'll help you find the shape of it.</p>
