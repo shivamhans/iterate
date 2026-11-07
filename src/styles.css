@@ -247,7 +247,7 @@ h1{font-size:clamp(34px,3.3vw,46px);letter-spacing:-1.7px}
 .brand-name,.popup-brand b{display:inline-flex;align-items:baseline;font-family:Manrope,Inter,system-ui,sans-serif;font-weight:800;letter-spacing:-1.05px;line-height:1;color:#fff;white-space:nowrap}
 .brand-name{font-size:23px}
 .popup-brand b{font-size:21px}
-.brand-initial{font-size:.78em!important;line-height:1!important;display:inline-block;transform:translateY(-.025em);letter-spacing:-.06em;margin-right:.005em}
+.brand-initial{font-size:1em!important;line-height:1!important;display:inline-block;flex:0 0 auto;transform:none;letter-spacing:inherit;margin-right:0;color:#bd7cff!important;font-weight:inherit}
 .brand-period{color:#c58aff}
 .popup-brand{gap:8px}
 .brand .brand-mark,.popup-brand .brand-mark{display:none}
