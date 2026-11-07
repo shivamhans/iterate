@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { listProjects, removeProject, saveProject, type StoredProject } from "./lib/projectStorage";
+import { listProjects, removeProject, saveProject, updateProject, type StoredProject } from "./lib/projectStorage";
 import {
   ArrowUpRight, ArrowRight, Bell, Bot, Check, ChevronDown,
   Compass, FileText, FolderKanban, Gauge, ImagePlus, Layers3,
@@ -76,27 +76,20 @@ function App() {
 
   const persistInterview = useCallback(async (data: NonNullable<Project["interviewData"]>) => {
     if (!interviewProject) return;
-    const updated = { ...interviewProject, interviewData: data, updated: "In progress", updatedAt: Date.now() };
     try {
-      await saveProject(updated);
-      setInterviewProject(current => current ? { ...current, interviewData: data, updated: "In progress", updatedAt: updated.updatedAt } : current);
+      const updated = await updateProject(interviewProject.id, current => ({ ...current, interviewData: data, updatedAt: Date.now() }));
+      setInterviewProject(current => current ? { ...current, interviewData: data, status: updated.status, updated: updated.updated, updatedAt: updated.updatedAt } : current);
       setProjects(current => current.map(item => item.id === updated.id ? updated : item).sort((a, b) => b.updatedAt - a.updatedAt));
-    } catch (error) {
-      notify(error instanceof Error ? error.message : "Could not save interview progress.");
-    }
+    } catch (error) { notify(error instanceof Error ? error.message : "Could not save interview progress."); }
   }, [interviewProject?.id]);
 
   const updateInterviewStatus = useCallback(async (status: string) => {
     if (!interviewProject) return;
     try {
-      const latestProjects = await listProjects();
-      const latest = latestProjects.find(item => item.id === interviewProject.id);
-      if (!latest) return;
-      const updated = { ...latest, status, updated: status, updatedAt: Date.now() };
-      await saveProject(updated);
+      const updated = await updateProject(interviewProject.id, current => ({ ...current, status, updated: status, updatedAt: Date.now() }));
       setInterviewProject(current => current ? { ...current, status, updated: status, updatedAt: updated.updatedAt } : current);
       setProjects(current => current.map(item => item.id === updated.id ? updated : item));
-    } catch { /* Interview content remains usable if a status badge cannot be saved. */ }
+    } catch { /* Keep the current interview usable if a status write fails. */ }
   }, [interviewProject?.id]);
 
   const notifyInterviewReady = useCallback((projectName: string) => {
