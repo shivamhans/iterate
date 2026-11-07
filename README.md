@@ -1,153 +1,258 @@
 # Iterate
 
-Iterate is a local-first Chrome extension that turns rough ideas into structured specifications and AI-ready prompts.
+**Turn rough ideas into clear requirements, structured specifications, and AI-ready prompts.**
 
-> **Current status:** UI foundation, local project management, and AI provider key management. Users can create, view, edit, and delete projects; configure OpenAI, Gemini, and Anthropic API keys; and test provider connectivity. The first adaptive AI interview flow is now available: it asks one question at a time, supports multiple-choice and custom answers, updates a structured working specification, and recommends when the user should review completion. The full specification editor, persistent interview history, and final prompt generation are still being built.
+Iterate is a local-first Chrome extension for thinking through an idea before asking an AI to build, write, design, or research it. It guides users through an adaptive, one-question-at-a-time interview and keeps project data in the browser.
 
-## Product principles
+> **Project status:** Active development / pre-release. The current branch contains the local project workspace, provider settings, direct provider adapters, an adaptive interview, saved interview progress, background-in-tab continuity, and project status indicators. The full specification editor, prompt-generation studio, image analysis, automatic version history, and robust export/import workflow are not yet complete. Do not treat this repository as a finished production release.
 
-- Runs in the user's browser; no Iterate-owned backend or application server.
-- Bring your own API key for OpenAI, Google Gemini, or Anthropic Claude (provider integration is planned, not available yet).
-- Projects and uploaded images are intended to remain in browser-local storage (IndexedDB); small settings use `chrome.storage.local`.
-- Images will only be sent to an AI provider after explicit user confirmation.
-- No analytics or telemetry in v1.
-- No automatic provider fallback.
-- Chrome Manifest V3, React, TypeScript, Vite, and Tailwind CSS.
+## Contents
 
-## Test the current extension in Chrome
+- [Why Iterate](#why-iterate)
+- [Features](#features)
+- [Current limitations](#current-limitations)
+- [Technology](#technology)
+- [Architecture and privacy](#architecture-and-privacy)
+- [Supported AI providers](#supported-ai-providers)
+- [Requirements](#requirements)
+- [Install from source](#install-from-source)
+- [Development](#development)
+- [How to use](#how-to-use)
+- [Data and troubleshooting](#data-and-troubleshooting)
+- [Security](#security)
+- [Contributing](#contributing)
+- [License](#license)
 
-### 1. Get the code
+## Why Iterate
 
-Clone the repository:
+A short prompt often hides important decisions: who the product is for, what problem it solves, which workflows matter, what constraints apply, and what a successful result looks like. Iterate is designed to surface those decisions before generating the final instructions.
 
-```bash
-git clone https://github.com/shivamhans/iterate.git
-cd iterate
+The intended workflow is:
+
+1. Capture a rough idea.
+2. Answer a dynamic interview that adapts to the project.
+3. Review and refine a structured specification.
+4. Generate one or more prompts from that specification.
+5. Revisit the project and keep its decisions organized.
+
+## Features
+
+### Available in the current development build
+
+- Chrome Manifest V3 extension with a popup and full workspace.
+- Dark, purple-accented glass interface.
+- Local project creation, editing, search, listing, and deletion.
+- IndexedDB-backed project storage.
+- Bring Your Own Key settings for OpenAI, Google Gemini, and Anthropic.
+- Automatic or manually selected model configuration.
+- Direct browser-to-provider requests; no Iterate application server.
+- Adaptive interview with one question per turn, multiple-choice options, custom answers, and a dynamic completion recommendation.
+- Interview progress saved with the local project.
+- Interview view remains mounted when navigating between workspace sections in the same open extension page.
+- Project status labels such as Thinking, Question ready, Ready for review, and Needs attention.
+- Timeout and provider error handling, plus a per-retry model switcher.
+
+### Planned / incomplete
+
+These items are product goals, not claims of functionality in the current build:
+
+- Full specification editor with confirmed requirements, assumptions, and unresolved decisions.
+- AI-assisted and manual specification editing with contradiction checks.
+- Detailed specification quality review and automatic version history.
+- Main prompt and task-specific prompt generation.
+- Detailed, concise, structured, Markdown, JSON, developer brief, and custom output formats.
+- Prompt quality checks and stale-prompt detection.
+- Image attachment and AI image analysis with explicit send consent.
+- Validated JSON project export/import and full data-management controls.
+- Durable AI jobs that continue after the workspace tab is closed or Chrome is shut down.
+
+## Current limitations
+
+- AI generation requires an internet connection and a valid API key with provider billing/quota configured. API usage may cost money.
+- Switching to another section of the same open workspace keeps the interview component mounted. This is **not** the same as a durable background job: closing the workspace tab, reloading the extension page, or shutting down Chrome can interrupt an in-flight request. Saved checkpoints can be reopened, but an unfinished network request is not guaranteed to complete in the background.
+- Model IDs change and availability varies by provider, account, region, and API access. Manual model selection is provided for this reason. The app cannot guarantee that every suggested model is enabled for every account.
+- Chrome extension local storage is not a hardware-backed secrets vault.
+- The app is pre-release; validate behavior with test projects before relying on it for important work.
+
+## Technology
+
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS
+- Chrome Extensions Manifest V3
+- IndexedDB for local project data
+- `chrome.storage.local` for provider settings and API keys
+- Fetch API for direct provider requests
+- Lucide React icons
+
+## Architecture and privacy
+
+Iterate is designed to run inside the user's browser. There is no Iterate-owned backend, hosted project database, account system, or cloud synchronization service in v1.
+
+**Data flow**
+
+```text
+User idea
+   |
+   v
+Iterate extension workspace
+   |
+   +----> IndexedDB (local projects and interview checkpoints)
+   |
+   +----> chrome.storage.local (provider settings and API keys)
+   |
+   v
+Selected AI provider (direct HTTPS request using user's API key)
+   |
+   v
+Interview decision returned to the extension
+   |
+   v
+Local project checkpoint
 ```
 
-The current development work is on the `feature/iterate-mvp-foundation` branch. Switch to it:
+- Project data is stored in the browser profile's IndexedDB.
+- Provider configuration and keys are stored in Chrome extension local storage.
+- AI requests go directly to the provider selected by the user.
+- Iterate does not receive or proxy provider keys or prompts through an Iterate server.
+- No analytics or telemetry are intentionally included.
+- No automatic provider fallback is performed.
+- No website content is collected by content scripts as part of the core workflow.
 
-```bash
-git checkout feature/iterate-mvp-foundation
-```
+## Supported AI providers
 
-If you already cloned the repository, run:
+| Provider | API integration | Notes |
+| --- | --- | --- |
+| OpenAI | Chat Completions API | Use an API key from the OpenAI developer platform. |
+| Google Gemini | Gemini generateContent API | Use an API key with Gemini API access. |
+| Anthropic Claude | Messages API | Direct browser access requires Anthropic's browser-access header and is subject to provider policy. |
 
-```bash
-git fetch origin
-git checkout feature/iterate-mvp-foundation
-git pull
-```
+A ChatGPT subscription does **not** include OpenAI API credit. API access and billing are managed separately by each provider.
 
-### 2. Install dependencies
+### Model selection
 
-Install Node.js (use Node.js 22 or a compatible current LTS release), then run:
+- **Automatic:** Iterate uses its configured default model for that provider.
+- **Manual:** Enter a model ID supported by your provider account.
+- **Change model:** When an interview request fails, select another saved provider/model for that retry. This does not silently change the default provider selection.
+- **No fallback:** Iterate does not send your prompt to another provider unless you explicitly select that provider.
+
+Model availability changes. Check the provider's current model documentation if a model returns a not-found or access error.
+
+## Requirements
+
+- Google Chrome or a Chromium-based browser with Manifest V3 support.
+- Node.js 20 or newer (Node.js 22 LTS recommended).
+- npm.
+- An API key for at least one supported provider to use AI interview features.
+
+## Install from source
+
+1. Clone this repository:
+
+   ```bash
+   git clone https://github.com/shivamhans/iterate.git
+   cd iterate
+   ```
+
+2. Switch to the development branch if you want the latest in-progress implementation:
+
+   ```bash
+   git checkout feature/iterate-mvp-foundation
+   git pull origin feature/iterate-mvp-foundation
+   ```
+
+3. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+4. Build the extension:
+
+   ```bash
+   npm run build
+   ```
+
+5. Load the built extension:
+
+   - Open `chrome://extensions`.
+   - Enable **Developer mode**.
+   - Select **Load unpacked**.
+   - Choose the generated `dist/` directory (not the repository root).
+   - Pin Iterate from Chrome's Extensions menu if desired.
+
+6. After source changes, run `npm run build`, then click **Reload** on the Iterate card in `chrome://extensions`. Refresh any already-open Iterate workspace page.
+
+## Development
 
 ```bash
 npm install
+npm run dev        # Vite development server (web preview, not full extension runtime)
+npm run typecheck  # TypeScript project checks
+npm run build      # Type-check and production extension build
+npm run preview    # Preview built web output
 ```
 
-### 3. Build the extension
+The production extension output is written to `dist/`. For extension-specific behavior (Chrome storage, notifications, popup, service worker), test the built extension in Chrome rather than relying only on the Vite development server.
 
-Run:
+## How to use
 
-```bash
-npm run build
-```
+1. Open Iterate from the Chrome toolbar.
+2. Open the full workspace.
+3. Go to **AI providers**.
+4. Add an API key for a provider, test the connection, save it, and select that provider.
+5. Create a project with a short description of your idea.
+6. Start the AI interview and answer the questions.
+7. If a request fails, use **Try again** or **Change model**.
+8. Return to **My projects** to reopen a saved interview checkpoint.
 
-Vite writes the production extension files into the `dist/` directory. Chrome must load the built directory, not the repository root.
+## Data and troubleshooting
 
-### 4. Load it into Chrome
+### Where is my data stored?
 
-1. Open Google Chrome.
-2. Visit `chrome://extensions`.
-3. Turn **Developer mode** on (top-right).
-4. Click **Load unpacked**.
-5. Select the project's `dist` folder (the folder containing `manifest.json`).
-6. Pin Iterate from the Extensions menu if you want quick access.
-7. Click the Iterate toolbar icon to open the popup. Use its workspace action to open the main extension page.
+- Projects and interview checkpoints: IndexedDB database `iterate-local`, object store `projects`.
+- Provider settings and API keys: Chrome extension local storage key `iterate.provider-config`.
 
-### 5. After changing the code
+Data is scoped to the browser profile and extension origin. Clearing extension data, resetting the browser profile, or uninstalling the extension can remove local data. Back up important information before clearing browser data.
 
-Whenever you make source changes:
+### Reset local data
 
-```bash
-npm run build
-```
+For development testing, open the extension page's DevTools → **Application** → **Storage** and clear the extension's site data. This can remove both projects and provider settings. To preserve API keys, delete only the `projects` object store in IndexedDB.
 
-Then return to `chrome://extensions` and click the **Reload** icon on the Iterate extension card. Refresh any already-open Iterate workspace tab as well.
+### Common issues
 
-### Optional: preview the UI during development
+- **Provider rejects a model (HTTP 404):** confirm the exact model ID is available to your API account, then use Change model or update the model under AI providers.
+- **HTTP 401/403:** check the API key, account permissions, and provider access.
+- **HTTP 429:** check rate limits, billing, and quota.
+- **Request times out:** check connectivity and provider status, then retry or choose another model.
+- **Extension API unavailable in Vite preview:** expected for APIs that require the Chrome extension runtime. Build and load `dist/` in Chrome.
+- **Changes do not appear:** rebuild, reload the extension on `chrome://extensions`, and refresh the workspace tab.
+- **Project list is empty after clearing data:** local project data was removed; the current release does not provide cloud recovery.
 
-To run Vite's development preview:
+## Security
 
-```bash
-npm run dev
-```
+- Never commit API keys, tokens, or personal project data.
+- Do not paste API keys into bug reports, screenshots, or public discussions.
+- Keys in `chrome.storage.local` are not encrypted by Iterate and are not stored in a hardware-backed vault. Use a trusted, protected browser profile.
+- Review each provider's data handling, retention, and billing terms before sending project information.
+- Do not send confidential or regulated data unless you have confirmed the provider and your organization's policies permit it.
+- Report suspected security vulnerabilities privately to the repository maintainer rather than opening a public issue containing exploit details.
 
-Open the local URL printed in the terminal. This is useful for quick UI work, but it is **not** the actual Chrome extension runtime. Use the build-and-load steps above to test the extension itself.
+## Contributing
 
-### Troubleshooting
+Contributions, bug reports, and focused improvement proposals are welcome.
 
-- **“Manifest file is missing or unreadable”** — make sure you selected `dist/`, not the project root.
-- **Changes aren't visible** — run `npm run build`, reload the extension at `chrome://extensions`, then refresh the workspace tab.
-- **Build fails** — check that Node.js and npm are installed, run `npm install` again, and inspect the first TypeScript/Vite error in the terminal.
-- **Extension service worker errors** — open `chrome://extensions`, find Iterate, and click the service worker **Inspect** link if Chrome displays one.
+1. Open an issue describing the problem or proposed change.
+2. Keep changes scoped and avoid introducing a backend, analytics, or automatic provider fallback without an explicit product decision.
+3. Run `npm run typecheck` and `npm run build`.
+4. Include clear reproduction steps and screenshots for UI changes.
+5. Never include API keys, credentials, or private project data in commits.
 
-## What you can test right now
+## License
 
-- The visual direction, popup, workspace, and responsive navigation.
-- Create a project from the dashboard, New iteration page, or New project button.
-- Open **My projects** and confirm the project appears.
-- Close the workspace tab, reopen Iterate, and confirm the project is still there.
-- Click a project to edit its starting idea and save changes.
-- Delete a project and confirm it disappears.
-- Search projects by name.
-- Confirm the dashboard's project and idea counts reflect saved projects.
+Iterate is licensed under the [MIT License](LICENSE).
 
-Projects are stored in IndexedDB inside the extension's browser profile. Clearing Chrome's extension/site data or uninstalling the extension may remove local project data; export/backup is not implemented yet.
+---
 
-Provider configuration is available under **AI providers**. You can save a key locally, test it against the selected provider's models endpoint, choose automatic or manual model mode, select the provider to use, or remove its saved key. Connection tests only verify API-key access; they do not yet generate AI responses. Image analysis, the full specification editor, persistent interview history, prompt generation, version history, and JSON backup/restore are still planned work.
-
-## Test AI provider configuration
-
-1. Open the Iterate workspace and choose **AI providers** in the sidebar.
-2. Paste an API key for one provider. Use a key created in that provider's official developer console; API usage may incur charges.
-3. Click **Test connection**. Iterate sends a small HTTPS request directly to that provider's models-list endpoint. It does not send a prompt or generate a response.
-4. Click **Save key** to store the key in `chrome.storage.local` for this extension profile.
-5. Choose automatic model mode or manual mode. In manual mode, enter a model ID supported by your provider account.
-6. Click **Use this provider** to save the selected provider.
-7. Use the trash icon to remove a saved key.
-
-**Security:** keys are stored locally by Chrome but are not encrypted by Iterate and Chrome local storage is not a hardware-backed secrets vault. Do not use a key on a shared or untrusted browser profile. The key is not sent to Iterate servers because Iterate has no backend; provider requests are direct from the extension. Never paste keys into issues, screenshots, or chat messages.
-
-## Test the AI interview
-
-1. Save and select an AI provider under **AI providers**.
-2. Create a project from the dashboard or **New iteration**.
-3. Iterate opens the interview screen for the new idea.
-4. Click **Start AI interview**. The selected provider receives the idea and returns one contextual question.
-5. Select one or more options where appropriate, or add a custom answer, then click **Continue**.
-6. Continue until Iterate recommends a specification review. Completion is not automatic; the user must approve.
-7. Try an invalid/missing key or disconnect the network to verify that the error is shown and no other provider is selected automatically.
-
-Interview answers currently live in the active interview session; persistent answer/specification history and the full review/edit screen are upcoming. The AI request is sent directly from the extension page to the one selected provider. There is no Iterate-owned server or provider fallback.
-
-## Architecture and product docs
-
-- [Product requirements](docs/PRD.md)
-- [Architecture notes](docs/ARCHITECTURE.md)
-
-## Development scripts
-
-| Command | Purpose |
-| --- | --- |
-| `npm install` | Install dependencies |
-| `npm run dev` | Start the Vite UI development server |
-| `npm run typecheck` | Run TypeScript project checks |
-| `npm run build` | Type-check and build the extension into `dist/` |
-| `npm run preview` | Preview the built web output locally |
-
-## Project principles
-
-Iterate is designed to run client-side in the user's browser. AI features will make direct requests to the provider selected by the user, using their own API key. There will be no Iterate-owned backend, hosted project database, account system, or cloud sync in v1.
+Built for clearer thinking. **Iterate.**
