@@ -4,7 +4,7 @@ import { readProviderConfig, testProviderConnection, writeProviderConfig, type P
 
 const providers: { id: ProviderId; name: string; subtitle: string; placeholder: string; models: string[] }[] = [
   { id: "openai", name: "OpenAI", subtitle: "GPT models", placeholder: "sk-…", models: ["gpt-4.1", "gpt-4.1-mini", "gpt-4.1-nano", "o4-mini"] },
-  { id: "gemini", name: "Google Gemini", subtitle: "Gemini models", placeholder: "AIza…", models: ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-2.5-flash-lite"] },
+  { id: "gemini", name: "Google Gemini", subtitle: "Gemini models", placeholder: "AIza…", models: ["gemini-2.5-pro", "gemini-3.8-flash", "gemini-3.8-flash-lite"] },
   { id: "anthropic", name: "Anthropic Claude", subtitle: "Claude models", placeholder: "sk-ant-…", models: ["claude-sonnet-4-5", "claude-haiku-4-5", "claude-opus-4-1"] }
 ];
 const blank: ProviderSettings = { apiKey: "", modelMode: "auto", model: "", updatedAt: 0 };
