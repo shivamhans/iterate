@@ -7,12 +7,19 @@
     "default_title": "Open Iterate",
     "default_popup": "popup.html"
   },
-  "permissions": ["storage"],
+  "permissions": [
+    "storage"
+  ],
   "background": {
     "service_worker": "service-worker.js",
     "type": "module"
   },
   "icons": {
     "128": "icon.svg"
-  }
+  },
+  "host_permissions": [
+    "https://api.openai.com/*",
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.anthropic.com/*"
+  ]
 }
