@@ -1,23 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, Check, ChevronLeft, LoaderCircle, Sparkles } from "lucide-react";
 import { generateInterviewDecision, type InterviewDecision, type InterviewTurn } from "../lib/interviewEngine";
 import { readProviderConfig, type ProviderConfig, type ProviderId } from "../lib/providerSettings";
+import type { StoredProject } from "../lib/projectStorage";
 
 const modelChoices: Record<ProviderId, { label: string; models: string[] }> = { openai: { label: "OpenAI", models: ["gpt-4.1-mini", "gpt-4.1", "gpt-4.1-nano", "o4-mini"] }, gemini: { label: "Google Gemini", models: ["gemini-3.8-flash", "gemini-2.5-pro", "gemini-3.8-flash-lite", "gemini-3-flash-preview"] }, anthropic: { label: "Anthropic Claude", models: ["claude-sonnet-4-5", "claude-haiku-4-5", "claude-opus-4-1"] } };
 const defaultModel: Record<ProviderId, string> = { openai: "gpt-4.1-mini", gemini: "gemini-3.8-flash", anthropic: "claude-sonnet-4-5" };
 
-export default function InterviewWorkspace({ idea, onExit }: { idea: string; onExit: () => void }) {
-  const [turns, setTurns] = useState<InterviewTurn[]>([]);
-  const [decision, setDecision] = useState<InterviewDecision | null>(null);
+export default function InterviewWorkspace({ idea, project, onUpdate, onExit }: { idea: string; project: StoredProject; onUpdate: (data: NonNullable<StoredProject["interviewData"]>) => void; onExit: () => void }) {
+  const [turns, setTurns] = useState<InterviewTurn[]>(project.interviewData?.turns || []);
+  const [decision, setDecision] = useState<InterviewDecision | null>(project.interviewData?.decision || null);
   const [selected, setSelected] = useState<string[]>([]);
   const [custom, setCustom] = useState("");
-  const [specification, setSpecification] = useState<Record<string, unknown>>({});
+  const [specification, setSpecification] = useState<Record<string, unknown>>(project.interviewData?.specification || {});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [approved, setApproved] = useState(false);
+  const [approved, setApproved] = useState(project.interviewData?.approved || false);
   const [providerConfig, setProviderConfig] = useState<ProviderConfig | null>(null);
   const [changeModelOpen, setChangeModelOpen] = useState(false);
   const [modelChoice, setModelChoice] = useState("");
+
+  useEffect(() => { onUpdate({ turns, decision, specification, approved, started: true }); }, [turns, decision, specification, approved, onUpdate]);
 
   async function requestNext(nextTurns: InterviewTurn[], override?: { provider: ProviderId; model: string }) {
     setBusy(true); setError("");
