@@ -64,7 +64,7 @@ function App() {
       <div className="app-frame">
         <aside className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}>
           <div className="brand">
-            <div className="brand-mark"><span /><span /><span /></div>
+            <svg className="brand-symbol" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><defs><linearGradient id="iterate-mark-main" x1="4" y1="3" x2="27" y2="29" gradientUnits="userSpaceOnUse"><stop stopColor="#F0C4FF"/><stop offset=".48" stopColor="#B66BFF"/><stop offset="1" stopColor="#7840D8"/></linearGradient><linearGradient id="iterate-mark-facet" x1="8" y1="10" x2="22" y2="27" gradientUnits="userSpaceOnUse"><stop stopColor="#E9B7FF"/><stop offset="1" stopColor="#8C4AE4"/></linearGradient></defs><path d="M16 2.5 30 28H2L16 2.5Z" fill="url(#iterate-mark-main)"/><path d="M16 10.2 25.1 27H6.9L16 10.2Z" fill="url(#iterate-mark-facet)" opacity=".88"/><path d="M16 10.2 16 27H6.9L16 10.2Z" fill="#F3D0FF" opacity=".36"/></svg>
             <span className="brand-name"><span className="brand-initial">i</span>terate<span className="brand-period">.</span></span>
             <button className="icon-button sidebar-close" onClick={() => setSidebarOpen(false)} aria-label="Close navigation"><X size={17}/></button>
           </div>
