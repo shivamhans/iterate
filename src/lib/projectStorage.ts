@@ -79,3 +79,25 @@ export async function removeProject(id: string): Promise<void> {
     db.close();
   }
 }
+
+/** Apply a project update inside one IndexedDB read/write transaction. */
+export async function updateProject(id: string, update: (project: StoredProject) => StoredProject): Promise<StoredProject> {
+  const db = await openDatabase();
+  try {
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readwrite");
+      const store = tx.objectStore(STORE_NAME);
+      const request = store.get(id);
+      let updated: StoredProject | undefined;
+      request.onsuccess = () => {
+        if (!request.result) { tx.abort(); reject(new Error("This project no longer exists.")); return; }
+        updated = update(request.result as StoredProject);
+        store.put(updated);
+      };
+      request.onerror = () => reject(request.error ?? new Error("Could not update project."));
+      tx.oncomplete = () => updated ? resolve(updated) : reject(new Error("Project update did not complete."));
+      tx.onerror = () => reject(tx.error ?? new Error("Could not update project."));
+      tx.onabort = () => reject(tx.error ?? new Error("Project update was interrupted."));
+    });
+  } finally { db.close(); }
+}
