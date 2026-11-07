@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { ArrowRight, Check, ChevronLeft, LoaderCircle, Sparkles } from "lucide-react";
 import { generateInterviewDecision, type InterviewDecision, type InterviewTurn } from "../lib/interviewEngine";
+import { readProviderConfig, type ProviderConfig, type ProviderId } from "../lib/providerSettings";
+
+const modelChoices: Record<ProviderId, { label: string; models: string[] }> = { openai: { label: "OpenAI", models: ["gpt-4.1-mini", "gpt-4.1", "gpt-4.1-nano", "o4-mini"] }, gemini: { label: "Google Gemini", models: ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite", "gemini-3-flash-preview"] }, anthropic: { label: "Anthropic Claude", models: ["claude-sonnet-4-5", "claude-haiku-4-5", "claude-opus-4-1"] } };
+const defaultModel: Record<ProviderId, string> = { openai: "gpt-4.1-mini", gemini: "gemini-2.5-flash", anthropic: "claude-sonnet-4-5" };
 
 export default function InterviewWorkspace({ idea, onExit }: { idea: string; onExit: () => void }) {
   const [turns, setTurns] = useState<InterviewTurn[]>([]);
@@ -11,11 +15,14 @@ export default function InterviewWorkspace({ idea, onExit }: { idea: string; onE
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [approved, setApproved] = useState(false);
+  const [providerConfig, setProviderConfig] = useState<ProviderConfig | null>(null);
+  const [changeModelOpen, setChangeModelOpen] = useState(false);
+  const [modelChoice, setModelChoice] = useState("");
 
-  async function requestNext(nextTurns: InterviewTurn[]) {
+  async function requestNext(nextTurns: InterviewTurn[], override?: { provider: ProviderId; model: string }) {
     setBusy(true); setError("");
     try {
-      const result = await generateInterviewDecision({ idea, turns: nextTurns, specification, knowledgeLevel: "unknown" });
+      const result = await generateInterviewDecision({ idea, turns: nextTurns, specification, knowledgeLevel: "unknown" }, override);
       setDecision(result);
       if (result.specification) setSpecification(result.specification);
     } catch (e) {
@@ -38,7 +45,21 @@ export default function InterviewWorkspace({ idea, onExit }: { idea: string; onE
         <p className="interview-idea">“{idea}”</p>
         {!decision && !busy && !error && <div className="interview-start"><p>Iterate will ask one thoughtful question at a time, adapting as your idea becomes clearer.</p><button className="primary-button" onClick={begin}>Start AI interview <ArrowRight size={15}/></button></div>}
         {busy && <div className="interview-thinking"><LoaderCircle className="spin" size={22}/><strong>Thinking through your idea…</strong><span>Finding the most useful next question.</span></div>}
-        {error && <div className="interview-error" role="alert"><strong>Couldn't continue the interview</strong><p>{error}</p><button className="secondary-button" onClick={()=>requestNext(turns)}>Try again</button></div>}
+        {error && <div className="interview-error" role="alert">
+          <strong>Couldn't continue the interview</strong><p>{error}</p>
+          <div className="interview-error-actions">
+            <button className="secondary-button" onClick={()=>requestNext(turns)}>Try again</button>
+            <button className="secondary-button" onClick={async()=>{const config=await readProviderConfig();setProviderConfig(config);const ids=(Object.keys(modelChoices) as ProviderId[]).filter(id=>config.providers[id]?.apiKey);const first=ids[0];if(first){const saved=config.providers[first];const model=saved?.modelMode==="manual"&&saved.model?saved.model:defaultModel[first];setModelChoice(first+"|"+model);}setChangeModelOpen(value=>!value);}}>Change model</button>
+          </div>
+          {changeModelOpen && <div className="interview-model-picker">
+            <label htmlFor="interview-model-choice">Choose a connected provider and model</label>
+            <select id="interview-model-choice" value={modelChoice} onChange={event=>setModelChoice(event.target.value)}>
+              {(Object.keys(modelChoices) as ProviderId[]).flatMap(id=>{const saved=providerConfig?.providers[id];if(!saved?.apiKey)return [];const preferred=saved.modelMode==="manual"&&saved.model?saved.model:defaultModel[id];return [...new Set([preferred,...modelChoices[id].models])].map(model=><option key={id+"|"+model} value={id+"|"+model}>{modelChoices[id].label+" · "+model}</option>);})}
+            </select>
+            <button className="primary-button" disabled={!modelChoice} onClick={()=>{const parts=modelChoice.split("|");setChangeModelOpen(false);void requestNext(turns,{provider:parts[0] as ProviderId,model:parts.slice(1).join("|")});}}>Retry with this model <ArrowRight size={14}/></button>
+            <small>Only providers with saved API keys are shown. This changes the model for this retry, not your default settings.</small>
+          </div>}
+        </div>}
         {question && !busy && <div className="interview-question">
           <div className="interview-section-label">{question.section || "DISCOVERY"} · {question.essential ? "IMPORTANT" : "OPTIONAL"}</div>
           <h3>{question.title}</h3><p>{question.explanation}</p>
