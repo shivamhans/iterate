@@ -251,3 +251,12 @@ h1{font-size:clamp(34px,3.3vw,46px);letter-spacing:-1.7px}
 .brand-period{color:#c58aff}
 .popup-brand{gap:8px}
 .brand .brand-mark,.popup-brand .brand-mark{display:none}
+
+
+/* Project creation and empty-state polish. */
+.compact-empty{padding:18px 10px;border:0;background:transparent}
+.compact-empty h3{font-size:14px;margin:8px 0 4px}
+.compact-empty p{font-size:10px}
+.danger-button{color:#f1a0b0;border-color:rgba(232,105,130,.22)}
+.danger-button:hover{color:#ffdce3;border-color:rgba(232,105,130,.55);background:rgba(170,49,75,.12)}
+.empty-state .primary-button{margin:12px auto 0}
