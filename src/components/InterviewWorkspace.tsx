@@ -7,7 +7,7 @@ import type { StoredProject } from "../lib/projectStorage";
 const modelChoices: Record<ProviderId, { label: string; models: string[] }> = { openai: { label: "OpenAI", models: ["gpt-4.1-mini", "gpt-4.1", "gpt-4.1-nano", "o4-mini"] }, gemini: { label: "Google Gemini", models: ["gemini-3.8-flash", "gemini-2.5-pro", "gemini-3.8-flash-lite", "gemini-3-flash-preview"] }, anthropic: { label: "Anthropic Claude", models: ["claude-sonnet-4-5", "claude-haiku-4-5", "claude-opus-4-1"] } };
 const defaultModel: Record<ProviderId, string> = { openai: "gpt-4.1-mini", gemini: "gemini-3.8-flash", anthropic: "claude-sonnet-4-5" };
 
-export default function InterviewWorkspace({ idea, project, onUpdate, onExit }: { idea: string; project: StoredProject; onUpdate: (data: NonNullable<StoredProject["interviewData"]>) => void; onExit: () => void }) {
+export default function InterviewWorkspace({ idea, project, onUpdate, onStatus, onReady, onExit }: { idea: string; project: StoredProject; onUpdate: (data: NonNullable<StoredProject["interviewData"]>) => void; onStatus: (status: string) => void; onReady: () => void; onExit: () => void }) {
   const [turns, setTurns] = useState<InterviewTurn[]>(project.interviewData?.turns || []);
   const [decision, setDecision] = useState<InterviewDecision | null>(project.interviewData?.decision || null);
   const [selected, setSelected] = useState<string[]>([]);
@@ -21,14 +21,18 @@ export default function InterviewWorkspace({ idea, project, onUpdate, onExit }: 
   const [modelChoice, setModelChoice] = useState("");
 
   useEffect(() => { onUpdate({ turns, decision, specification, approved, started: true }); }, [turns, decision, specification, approved, onUpdate]);
+  useEffect(() => { if (busy) onStatus("Thinking"); }, [busy, onStatus]);
 
   async function requestNext(nextTurns: InterviewTurn[], override?: { provider: ProviderId; model: string }) {
     setBusy(true); setError("");
     try {
       const result = await generateInterviewDecision({ idea, turns: nextTurns, specification, knowledgeLevel: "unknown" }, override);
       setDecision(result);
+      onStatus(result.kind === "ready" ? "Ready for review" : "Question ready");
+      onReady();
       if (result.specification) setSpecification(result.specification);
     } catch (e) {
+      onStatus("Needs attention");
       setError(e instanceof Error ? e.message : "Something went wrong while contacting your AI provider.");
     } finally { setBusy(false); }
   }
