@@ -54,7 +54,7 @@ function cleanJson(text: string): InterviewDecision {
   }
   return parsed;
 }
-async function requestOpenAI(key: string, model: string, prompt: string): Promise<string> {
+function normalizeProviderError(detail: unknown, status: number, provider: string): string {\n  if (status === 401 || status === 403) return `${provider} rejected the API key or its permissions. Check AI providers.`;\n  if (status === 404) return `${provider} could not find this model. Choose a model supported by your API account.`;\n  if (status === 429) return `${provider} rate-limited the request or the account has insufficient quota. Check billing and limits.`;\n  if (status >= 500) return `${provider} is temporarily unavailable. Try again shortly.`;\n  return typeof detail === "string" && detail.trim() ? detail.slice(0, 320) : `${provider} request failed (HTTP ${status}).`;\n}\nasync function requestOpenAI(key: string, model: string, prompt: string): Promise<string> {
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST", signal: AbortSignal.timeout(45000), headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
     body: JSON.stringify({ model: model || "gpt-4.1-mini", temperature: 0.3, response_format: { type: "json_object" }, messages: [{ role: "system", content: SYSTEM_INSTRUCTIONS }, { role: "user", content: prompt }] })
@@ -93,7 +93,7 @@ export async function generateInterviewDecision(context: InterviewContext, model
   if (!provider) throw new Error("Choose and save an AI provider in AI providers before starting an interview.");
   const settings = config.providers[provider];
   if (!settings?.apiKey) throw new Error("The selected provider has no saved API key. Reconnect it in AI providers.");
-  const prompt = `Project idea:\n${context.idea}\n\nKnown knowledge level: ${context.knowledgeLevel}\n\nAnswers so far (oldest first):\n${JSON.stringify(context.turns, null, 2)}\n\nCurrent specification (update this, preserving confirmed facts):\n${JSON.stringify(context.specification, null, 2)}\n\nDecide whether to ask the next highest-value question or recommend that the user review completion. Return only the required JSON.`;
+  // Compact context reduces repeated whitespace and omits UI-only question metadata.\n  const compactTurns = context.turns.map((turn, index) => ({ n: index + 1, section: turn.question.section, q: turn.question.title, a: turn.answer, ...(turn.customAnswer ? { custom: turn.customAnswer } : {}) }));\n  const prompt = `IDEA\\n${context.idea}\\n\\nKNOWLEDGE\\n${context.knowledgeLevel}\\n\\nANSWERS (oldest first)\\n${JSON.stringify(compactTurns)}\\n\\nCURRENT SPECIFICATION (preserve confirmed facts; update only with supported information)\\n${JSON.stringify(context.specification)}\\n\\nChoose the single highest-value next question or recommend review when requirements are sufficiently clear. Return only the required JSON.`;
   let raw: string;
   try {
     const model = modelOverride?.model || (settings.modelMode === "manual" ? settings.model : "");
