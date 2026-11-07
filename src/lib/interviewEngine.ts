@@ -1,4 +1,4 @@
-import { readProviderConfig } from "./providerSettings";
+import { readProviderConfig, type ProviderId } from "./providerSettings";
 
 export type InterviewOption = { id: string; label: string; description?: string };
 export type InterviewQuestion = {
@@ -87,18 +87,19 @@ async function requestAnthropic(key: string, model: string, prompt: string): Pro
   if (!content) throw new Error("Claude returned an empty response.");
   return content;
 }
-export async function generateInterviewDecision(context: InterviewContext): Promise<InterviewDecision> {
+export async function generateInterviewDecision(context: InterviewContext, modelOverride?: { provider: ProviderId; model: string }): Promise<InterviewDecision> {
   const config = await readProviderConfig();
-  const provider = config.selectedProvider;
+  const provider = modelOverride?.provider || config.selectedProvider;
   if (!provider) throw new Error("Choose and save an AI provider in AI providers before starting an interview.");
   const settings = config.providers[provider];
   if (!settings?.apiKey) throw new Error("The selected provider has no saved API key. Reconnect it in AI providers.");
   const prompt = `Project idea:\n${context.idea}\n\nKnown knowledge level: ${context.knowledgeLevel}\n\nAnswers so far (oldest first):\n${JSON.stringify(context.turns, null, 2)}\n\nCurrent specification (update this, preserving confirmed facts):\n${JSON.stringify(context.specification, null, 2)}\n\nDecide whether to ask the next highest-value question or recommend that the user review completion. Return only the required JSON.`;
   let raw: string;
   try {
-    if (provider === "openai") raw = await requestOpenAI(settings.apiKey, settings.modelMode === "manual" ? settings.model : "", prompt);
-    else if (provider === "gemini") raw = await requestGemini(settings.apiKey, settings.modelMode === "manual" ? settings.model : "", prompt);
-    else raw = await requestAnthropic(settings.apiKey, settings.modelMode === "manual" ? settings.model : "", prompt);
+    const model = modelOverride?.model || (settings.modelMode === "manual" ? settings.model : "");
+    if (provider === "openai") raw = await requestOpenAI(settings.apiKey, model, prompt);
+    else if (provider === "gemini") raw = await requestGemini(settings.apiKey, model, prompt);
+    else raw = await requestAnthropic(settings.apiKey, model, prompt);
   } catch (error) {
     if (error instanceof TypeError) throw new Error("Could not reach the selected provider. Check your connection, provider API access, and extension host permissions.");
     throw error;
