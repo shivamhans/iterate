@@ -66,7 +66,7 @@ async function requestOpenAI(key: string, model: string, prompt: string): Promis
   return content;
 }
 async function requestGemini(key: string, model: string, prompt: string): Promise<string> {
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model || "gemini-2.5-flash")}:generateContent?key=${encodeURIComponent(key)}`, {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model || "gemini-3.8-flash")}:generateContent?key=${encodeURIComponent(key)}`, {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTIONS }] }, contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json", temperature: 0.3 } })
   });
