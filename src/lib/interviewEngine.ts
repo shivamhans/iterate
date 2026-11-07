@@ -54,13 +54,20 @@ function cleanJson(text: string): InterviewDecision {
   }
   return parsed;
 }
-function normalizeProviderError(detail: unknown, status: number, provider: string): string {\n  if (status === 401 || status === 403) return `${provider} rejected the API key or its permissions. Check AI providers.`;\n  if (status === 404) return `${provider} could not find this model. Choose a model supported by your API account.`;\n  if (status === 429) return `${provider} rate-limited the request or the account has insufficient quota. Check billing and limits.`;\n  if (status >= 500) return `${provider} is temporarily unavailable. Try again shortly.`;\n  return typeof detail === "string" && detail.trim() ? detail.slice(0, 320) : `${provider} request failed (HTTP ${status}).`;\n}\nasync function requestOpenAI(key: string, model: string, prompt: string): Promise<string> {
+function normalizeProviderError(detail: unknown, status: number, provider: string): string {
+  if (status === 401 || status === 403) return `${provider} rejected the API key or its permissions. Check AI providers.`;
+  if (status === 404) return `${provider} could not find this model. Choose a model supported by your API account.`;
+  if (status === 429) return `${provider} rate-limited the request or the account has insufficient quota. Check billing and limits.`;
+  if (status >= 500) return `${provider} is temporarily unavailable. Try again shortly.`;
+  return typeof detail === "string" && detail.trim() ? detail.slice(0, 320) : `${provider} request failed (HTTP ${status}).`;
+}
+async function requestOpenAI(key: string, model: string, prompt: string): Promise<string> {
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST", signal: AbortSignal.timeout(45000), headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
     body: JSON.stringify({ model: model || "gpt-4.1-mini", temperature: 0.3, response_format: { type: "json_object" }, messages: [{ role: "system", content: SYSTEM_INSTRUCTIONS }, { role: "user", content: prompt }] })
   });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data?.error?.message || `OpenAI request failed (HTTP ${response.status}).`);
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(normalizeProviderError(data?.error?.message, response.status, "OpenAI"));
   const content = data?.choices?.[0]?.message?.content;
   if (!content) throw new Error("OpenAI returned an empty response.");
   return content;
@@ -70,8 +77,8 @@ async function requestGemini(key: string, model: string, prompt: string): Promis
     method: "POST", signal: AbortSignal.timeout(45000), headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTIONS }] }, contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json", temperature: 0.3 } })
   });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data?.error?.message || `Gemini request failed (HTTP ${response.status}).`);
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(normalizeProviderError(data?.error?.message, response.status, "Gemini"));
   const content = data?.candidates?.[0]?.content?.parts?.map((part: { text?: string }) => part.text || "").join("");
   if (!content) throw new Error("Gemini returned an empty response.");
   return content;
@@ -81,8 +88,8 @@ async function requestAnthropic(key: string, model: string, prompt: string): Pro
     method: "POST", signal: AbortSignal.timeout(45000), headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
     body: JSON.stringify({ model: model || "claude-sonnet-4-5", max_tokens: 1800, temperature: 0.3, system: SYSTEM_INSTRUCTIONS, messages: [{ role: "user", content: prompt }] })
   });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data?.error?.message || `Claude request failed (HTTP ${response.status}).`);
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(normalizeProviderError(data?.error?.message, response.status, "Claude"));
   const content = data?.content?.filter((part: { type: string }) => part.type === "text").map((part: { text: string }) => part.text).join("");
   if (!content) throw new Error("Claude returned an empty response.");
   return content;
