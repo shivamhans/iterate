@@ -79,12 +79,12 @@ function App() {
     const updated = { ...interviewProject, interviewData: data, updated: "In progress", updatedAt: Date.now() };
     try {
       await saveProject(updated);
-      setInterviewProject(updated);
+      setInterviewProject(current => current ? { ...current, interviewData: data, updated: "In progress", updatedAt: updated.updatedAt } : current);
       setProjects(current => current.map(item => item.id === updated.id ? updated : item).sort((a, b) => b.updatedAt - a.updatedAt));
     } catch (error) {
       notify(error instanceof Error ? error.message : "Could not save interview progress.");
     }
-  }, [interviewProject]);
+  }, [interviewProject?.id]);
 
   async function deleteCurrentProject() {
     if (!editingProject) return;
