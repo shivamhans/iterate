@@ -8,6 +8,7 @@ export type StoredProject = {
   initialIdea: string;
   createdAt: number;
   updatedAt: number;
+  interviewData?: { turns: import("./interviewEngine").InterviewTurn[]; decision: import("./interviewEngine").InterviewDecision | null; specification: Record<string, unknown>; approved: boolean; started: boolean };
 };
 
 const DATABASE_NAME = "iterate-local";
