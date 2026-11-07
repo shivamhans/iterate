@@ -2,7 +2,7 @@
 
 Iterate is a local-first Chrome extension that turns rough ideas into structured specifications and AI-ready prompts.
 
-> **Current status:** UI foundation, local project management, and AI provider key management. Users can create, view, edit, and delete projects; configure OpenAI, Gemini, and Anthropic API keys; and test provider connectivity. The adaptive interview, specification editor, and prompt generation are not implemented yet.
+> **Current status:** UI foundation, local project management, and AI provider key management. Users can create, view, edit, and delete projects; configure OpenAI, Gemini, and Anthropic API keys; and test provider connectivity. The first adaptive AI interview flow is now available: it asks one question at a time, supports multiple-choice and custom answers, updates a structured working specification, and recommends when the user should review completion. The full specification editor, persistent interview history, and final prompt generation are still being built.
 
 ## Product principles
 
@@ -107,7 +107,7 @@ Open the local URL printed in the terminal. This is useful for quick UI work, bu
 
 Projects are stored in IndexedDB inside the extension's browser profile. Clearing Chrome's extension/site data or uninstalling the extension may remove local project data; export/backup is not implemented yet.
 
-Provider configuration is available under **AI providers**. You can save a key locally, test it against the selected provider's models endpoint, choose automatic or manual model mode, select the provider to use, or remove its saved key. Connection tests only verify API-key access; they do not yet generate AI responses. The adaptive interview, image analysis, specification editing, prompt generation, version history, and JSON backup/restore are still planned work.
+Provider configuration is available under **AI providers**. You can save a key locally, test it against the selected provider's models endpoint, choose automatic or manual model mode, select the provider to use, or remove its saved key. Connection tests only verify API-key access; they do not yet generate AI responses. Image analysis, the full specification editor, persistent interview history, prompt generation, version history, and JSON backup/restore are still planned work.
 
 ## Test AI provider configuration
 
@@ -120,6 +120,18 @@ Provider configuration is available under **AI providers**. You can save a key l
 7. Use the trash icon to remove a saved key.
 
 **Security:** keys are stored locally by Chrome but are not encrypted by Iterate and Chrome local storage is not a hardware-backed secrets vault. Do not use a key on a shared or untrusted browser profile. The key is not sent to Iterate servers because Iterate has no backend; provider requests are direct from the extension. Never paste keys into issues, screenshots, or chat messages.
+
+## Test the AI interview
+
+1. Save and select an AI provider under **AI providers**.
+2. Create a project from the dashboard or **New iteration**.
+3. Iterate opens the interview screen for the new idea.
+4. Click **Start AI interview**. The selected provider receives the idea and returns one contextual question.
+5. Select one or more options where appropriate, or add a custom answer, then click **Continue**.
+6. Continue until Iterate recommends a specification review. Completion is not automatic; the user must approve.
+7. Try an invalid/missing key or disconnect the network to verify that the error is shown and no other provider is selected automatically.
+
+Interview answers currently live in the active interview session; persistent answer/specification history and the full review/edit screen are upcoming. The AI request is sent directly from the extension page to the one selected provider. There is no Iterate-owned server or provider fallback.
 
 ## Architecture and product docs
 
