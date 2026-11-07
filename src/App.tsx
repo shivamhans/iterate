@@ -65,7 +65,7 @@ function App() {
         <aside className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}>
           <div className="brand">
             <div className="brand-mark"><span /><span /><span /></div>
-            <span className="brand-name">iterate<span className="brand-period">.</span></span>
+            <span className="brand-name"><span className="brand-initial">i</span>terate<span className="brand-period">.</span></span>
             <button className="icon-button sidebar-close" onClick={() => setSidebarOpen(false)} aria-label="Close navigation"><X size={17}/></button>
           </div>
           <div className="workspace-label">WORKSPACE</div>
