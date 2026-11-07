@@ -1,8 +1,7 @@
 import { useMemo, useState } from "react";
 import {
-  Activity, ArrowDownRight, ArrowUpRight, ArrowUp, ArrowRight, AudioWaveform,
-  BarChart3, Bell, Bot, BrainCircuit, Check, ChevronDown, CircleHelp, Command,
-  Compass, Copy, FileText, FolderKanban, Gauge, ImagePlus, Layers3, Lightbulb,
+  ArrowUpRight, ArrowRight, Bell, Bot, Check, ChevronDown,
+  Compass, FileText, FolderKanban, Gauge, ImagePlus, Layers3,
   Menu, MessageSquareText, MoreHorizontal, Plus, Search, Settings2, ShieldCheck,
   Sparkles, WandSparkles, X, Zap
 } from "lucide-react";
@@ -32,7 +31,6 @@ function App() {
   const [showNew, setShowNew] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [toast, setToast] = useState("");
-  const [providerReady, setProviderReady] = useState(false);
   const filtered = useMemo(() => projects.filter(p => p.name.toLowerCase().includes(search.toLowerCase())), [projects, search]);
 
   function startIteration() {
@@ -57,15 +55,6 @@ function App() {
     window.setTimeout(() => setToast(""), 4200);
   }
 
-  async function copyText(text: string) {
-    try {
-      await navigator.clipboard.writeText(text);
-      setToast("Copied to clipboard");
-    } catch {
-      setToast("Clipboard access is unavailable here.");
-    }
-    window.setTimeout(() => setToast(""), 2400);
-  }
 
   return (
     <div className="app-shell">
