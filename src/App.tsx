@@ -7,6 +7,7 @@ import {
   Sparkles, WandSparkles, X, Zap
 } from "lucide-react";
 import ProviderSettingsPanel from "./components/ProviderSettingsPanel";
+import InterviewWorkspace from "./components/InterviewWorkspace";
 import "./styles.css";
 
 type Project = StoredProject;
@@ -25,6 +26,7 @@ function App() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(true);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [interviewIdea, setInterviewIdea] = useState("");
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [showNew, setShowNew] = useState(false);
@@ -108,8 +110,13 @@ function App() {
       setIdea("");
       setShowNew(false);
       setEditingProject(null);
-      setActive("My projects");
-      notify(editingProject ? "Project updated and saved on this device." : "Project created and saved on this device.");
+      if (!editingProject) {
+        setInterviewIdea(project.initialIdea);
+        setActive("New iteration");
+      } else {
+        setActive("My projects");
+      }
+      notify(editingProject ? "Project updated and saved on this device." : "Project created. Your AI interview is ready to start.");
     } catch (error) {
       notify(error instanceof Error ? error.message : "Could not save this project. Please try again.");
     }
@@ -230,14 +237,14 @@ function App() {
               {projectsLoading && <div className="empty-state"><p>Loading your local projects…</p></div>}
             </section>}
 
-            {active === "New iteration" && <section className="subpage iteration-page">
+            {active === "New iteration" && (interviewIdea ? <InterviewWorkspace idea={interviewIdea} onExit={()=>{setInterviewIdea("");setActive("My projects");}}/> : <section className="subpage iteration-page">
               <div className="iteration-intro"><div className="eyebrow"><Sparkles size={13}/> YOUR NEXT BIG THING</div><h1>Let's make it <span>real.</span></h1><p>Start with the messy version. We'll figure out the details together.</p></div>
               <div className="iteration-card glass-card">
                 <div className="section-kicker">01 / THE STARTING POINT</div><h2>Tell us what you're thinking.</h2><p className="muted-copy">A rough description, a problem you want to solve, or even a half-formed thought.</p>
                 <textarea className="large-idea-input" value={idea} onChange={e=>setIdea(e.target.value)} placeholder="I want to create something that..." rows={6}/>
                 <div className="iteration-card-bottom"><span><ShieldCheck size={14}/> Saved locally on this device</span><button className="primary-button" onClick={startIteration}>Begin my iteration <ArrowRight size={15}/></button></div>
               </div>
-            </section>}
+            </section>)}
 
             {active === "Prompt studio" && <section className="subpage"><div className="page-heading"><div><div className="eyebrow">FROM CLEAR THINKING TO CLEAR OUTPUT</div><h1>Prompt <span>studio.</span></h1><p>Your specifications become prompts ready for the next step.</p></div></div><div className="coming-panel glass-card"><div className="coming-icon"><WandSparkles size={24}/></div><h2>Your prompt studio is taking shape.</h2><p>Once a project has a reviewed specification, its main and task-specific prompts will live here.</p></div></section>}
 
