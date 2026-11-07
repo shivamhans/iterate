@@ -86,13 +86,13 @@ function App() {
     const now = Date.now();
     const project: Project = editingProject ? {
       ...editingProject,
-      name: idea.trim().replace(/\\s+/g, " ").slice(0, 48),
+      name: idea.trim().replace(/\s+/g, " ").slice(0, 48),
       initialIdea: idea.trim(),
       updated: "Just updated",
       updatedAt: now
     } : {
       id: crypto.randomUUID(),
-      name: idea.trim().replace(/\\s+/g, " ").slice(0, 48),
+      name: idea.trim().replace(/\s+/g, " ").slice(0, 48),
       kind: "New idea",
       updated: "Just created",
       status: "Draft",
