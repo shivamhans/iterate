@@ -56,7 +56,7 @@ function cleanJson(text: string): InterviewDecision {
 }
 async function requestOpenAI(key: string, model: string, prompt: string): Promise<string> {
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+    method: "POST", signal: AbortSignal.timeout(45000), headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
     body: JSON.stringify({ model: model || "gpt-4.1-mini", temperature: 0.3, response_format: { type: "json_object" }, messages: [{ role: "system", content: SYSTEM_INSTRUCTIONS }, { role: "user", content: prompt }] })
   });
   const data = await response.json();
@@ -67,7 +67,7 @@ async function requestOpenAI(key: string, model: string, prompt: string): Promis
 }
 async function requestGemini(key: string, model: string, prompt: string): Promise<string> {
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model || "gemini-3.8-flash")}:generateContent?key=${encodeURIComponent(key)}`, {
-    method: "POST", headers: { "Content-Type": "application/json" },
+    method: "POST", signal: AbortSignal.timeout(45000), headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTIONS }] }, contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json", temperature: 0.3 } })
   });
   const data = await response.json();
@@ -78,7 +78,7 @@ async function requestGemini(key: string, model: string, prompt: string): Promis
 }
 async function requestAnthropic(key: string, model: string, prompt: string): Promise<string> {
   const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST", headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+    method: "POST", signal: AbortSignal.timeout(45000), headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
     body: JSON.stringify({ model: model || "claude-sonnet-4-5", max_tokens: 1800, temperature: 0.3, system: SYSTEM_INSTRUCTIONS, messages: [{ role: "user", content: prompt }] })
   });
   const data = await response.json();
@@ -101,6 +101,7 @@ export async function generateInterviewDecision(context: InterviewContext, model
     else if (provider === "gemini") raw = await requestGemini(settings.apiKey, model, prompt);
     else raw = await requestAnthropic(settings.apiKey, model, prompt);
   } catch (error) {
+    if (error instanceof DOMException && error.name === "TimeoutError") throw new Error("The AI provider did not respond within 45 seconds. Try again or change the model.");
     if (error instanceof TypeError) throw new Error("Could not reach the selected provider. Check your connection, provider API access, and extension host permissions.");
     throw error;
   }
