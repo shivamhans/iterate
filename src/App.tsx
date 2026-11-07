@@ -88,8 +88,15 @@ function App() {
 
   const updateInterviewStatus = useCallback(async (status: string) => {
     if (!interviewProject) return;
-    const updated = { ...interviewProject, status, updated: status, updatedAt: Date.now() };
-    try { await saveProject(updated); setInterviewProject(current => current ? { ...current, status, updated: status, updatedAt: updated.updatedAt } : current); setProjects(current => current.map(item => item.id === updated.id ? updated : item)); } catch { /* Interview content remains usable if a status badge cannot be saved. */ }
+    try {
+      const latestProjects = await listProjects();
+      const latest = latestProjects.find(item => item.id === interviewProject.id);
+      if (!latest) return;
+      const updated = { ...latest, status, updated: status, updatedAt: Date.now() };
+      await saveProject(updated);
+      setInterviewProject(current => current ? { ...current, status, updated: status, updatedAt: updated.updatedAt } : current);
+      setProjects(current => current.map(item => item.id === updated.id ? updated : item));
+    } catch { /* Interview content remains usable if a status badge cannot be saved. */ }
   }, [interviewProject?.id]);
 
   const notifyInterviewReady = useCallback((projectName: string) => {
