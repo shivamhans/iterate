@@ -2,7 +2,7 @@
 
 Iterate is a local-first Chrome extension that turns rough ideas into structured specifications and AI-ready prompts.
 
-> **Current status:** early UI and extension foundation. The dashboard, popup, and navigation are available for visual testing. AI provider connections, the adaptive interview, specification editor, and prompt generation are not implemented yet.
+> **Current status:** UI foundation plus local project management. Users can create, view, edit, and delete projects; project records persist in the browser with IndexedDB. AI provider connections, the adaptive interview, specification editor, and prompt generation are not implemented yet.
 
 ## Product principles
 
@@ -96,11 +96,18 @@ Open the local URL printed in the terminal. This is useful for quick UI work, bu
 
 ## What you can test right now
 
-- The visual direction: near-black/navy surfaces with purple and blue ambient lighting, violet accents, and glass-style panels.
-- The extension popup and main workspace shell.
-- The responsive layout and navigation presentation.
+- The visual direction, popup, workspace, and responsive navigation.
+- Create a project from the dashboard, New iteration page, or New project button.
+- Open **My projects** and confirm the project appears.
+- Close the workspace tab, reopen Iterate, and confirm the project is still there.
+- Click a project to edit its starting idea and save changes.
+- Delete a project and confirm it disappears.
+- Search projects by name.
+- Confirm the dashboard's project and idea counts reflect saved projects.
 
-The current dashboard contains illustrative/placeholder content. API-key setup, provider calls, real project persistence throughout the UI, AI questioning, image analysis, specification editing, prompt generation, version history, and JSON backup/restore are still planned work. Do not enter a real API key yet.
+Projects are stored in IndexedDB inside the extension's browser profile. Clearing Chrome's extension/site data or uninstalling the extension may remove local project data; export/backup is not implemented yet.
+
+AI-key setup, provider calls, adaptive questioning, image analysis, specification editing, prompt generation, version history, and JSON backup/restore are still planned work. Do not enter a real API key yet.
 
 ## Architecture and product docs
 
