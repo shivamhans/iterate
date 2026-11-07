@@ -116,7 +116,7 @@ export default function ProviderSettingsPanel() {
           <label>Model selection</label>
           <div className="provider-model-controls">
             <select aria-label={`${provider.name} model selection mode`} value={draft.modelMode} onChange={e => updateDraft(provider.id, { modelMode: e.target.value as "auto" | "manual" })}><option value="auto">Automatic (recommended)</option><option value="manual">Choose manually</option></select>
-            {draft.modelMode === "manual" && <select aria-label={`${provider.name} model`} value={draft.model} onChange={e => updateDraft(provider.id, { model: e.target.value })}><option value="">Select a model</option>{provider.models.map(model => <option key={model} value={model}>{model}</option>)}</select>}
+            {draft.modelMode === "manual" && <input className="provider-model-input" aria-label={`${provider.name} model ID`} list={`${provider.id}-model-suggestions`} value={draft.model} placeholder="Enter model ID" onChange={e => updateDraft(provider.id, { model: e.target.value })}/>}<datalist id={`${provider.id}-model-suggestions`}>{provider.models.map(model => <option key={model} value={model}/>)}</datalist>
           </div>
         </div>
         {message && <p className={`provider-feedback feedback-${message.kind}`} role="status">{message.text}</p>}
