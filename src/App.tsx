@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { listProjects, removeProject, saveProject, type StoredProject } from "./lib/projectStorage";
 import {
   ArrowUpRight, ArrowRight, Bell, Bot, Check, ChevronDown,
@@ -27,6 +27,7 @@ function App() {
   const [projectsLoading, setProjectsLoading] = useState(true);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [interviewIdea, setInterviewIdea] = useState("");
+  const [interviewProject, setInterviewProject] = useState<Project | null>(null);
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [showNew, setShowNew] = useState(false);
@@ -60,10 +61,30 @@ function App() {
   }
 
   function openProject(project: Project) {
+    if (project.interviewData?.started) {
+      setInterviewProject(project);
+      setInterviewIdea(project.initialIdea);
+      setActive("New iteration");
+      setShowNew(false);
+      setEditingProject(null);
+      return;
+    }
     setEditingProject(project);
     setIdea(project.initialIdea);
     setShowNew(true);
   }
+
+  const persistInterview = useCallback(async (data: NonNullable<Project["interviewData"]>) => {
+    if (!interviewProject) return;
+    const updated = { ...interviewProject, interviewData: data, updated: "In progress", updatedAt: Date.now() };
+    try {
+      await saveProject(updated);
+      setInterviewProject(updated);
+      setProjects(current => current.map(item => item.id === updated.id ? updated : item).sort((a, b) => b.updatedAt - a.updatedAt));
+    } catch (error) {
+      notify(error instanceof Error ? error.message : "Could not save interview progress.");
+    }
+  }, [interviewProject]);
 
   async function deleteCurrentProject() {
     if (!editingProject) return;
@@ -111,6 +132,7 @@ function App() {
       setShowNew(false);
       setEditingProject(null);
       if (!editingProject) {
+        setInterviewProject(project);
         setInterviewIdea(project.initialIdea);
         setActive("New iteration");
       } else {
@@ -237,7 +259,7 @@ function App() {
               {projectsLoading && <div className="empty-state"><p>Loading your local projects…</p></div>}
             </section>}
 
-            {active === "New iteration" && (interviewIdea ? <InterviewWorkspace idea={interviewIdea} onExit={()=>{setInterviewIdea("");setActive("My projects");}}/> : <section className="subpage iteration-page">
+            {active === "New iteration" && (interviewIdea ? <InterviewWorkspace key={interviewProject.id} idea={interviewIdea} project={interviewProject} onUpdate={persistInterview} onExit={()=>{setInterviewIdea("");setInterviewProject(null);setActive("My projects");}}/> : <section className="subpage iteration-page">
               <div className="iteration-intro"><div className="eyebrow"><Sparkles size={13}/> YOUR NEXT BIG THING</div><h1>Let's make it <span>real.</span></h1><p>Start with the messy version. We'll figure out the details together.</p></div>
               <div className="iteration-card glass-card">
                 <div className="section-kicker">01 / THE STARTING POINT</div><h2>Tell us what you're thinking.</h2><p className="muted-copy">A rough description, a problem you want to solve, or even a half-formed thought.</p>
