@@ -3,8 +3,8 @@ import { ArrowRight, Check, ChevronLeft, LoaderCircle, Sparkles } from "lucide-r
 import { generateInterviewDecision, type InterviewDecision, type InterviewTurn } from "../lib/interviewEngine";
 import { readProviderConfig, type ProviderConfig, type ProviderId } from "../lib/providerSettings";
 
-const modelChoices: Record<ProviderId, { label: string; models: string[] }> = { openai: { label: "OpenAI", models: ["gpt-4.1-mini", "gpt-4.1", "gpt-4.1-nano", "o4-mini"] }, gemini: { label: "Google Gemini", models: ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite", "gemini-3-flash-preview"] }, anthropic: { label: "Anthropic Claude", models: ["claude-sonnet-4-5", "claude-haiku-4-5", "claude-opus-4-1"] } };
-const defaultModel: Record<ProviderId, string> = { openai: "gpt-4.1-mini", gemini: "gemini-2.5-flash", anthropic: "claude-sonnet-4-5" };
+const modelChoices: Record<ProviderId, { label: string; models: string[] }> = { openai: { label: "OpenAI", models: ["gpt-4.1-mini", "gpt-4.1", "gpt-4.1-nano", "o4-mini"] }, gemini: { label: "Google Gemini", models: ["gemini-3.8-flash", "gemini-2.5-pro", "gemini-3.8-flash-lite", "gemini-3-flash-preview"] }, anthropic: { label: "Anthropic Claude", models: ["claude-sonnet-4-5", "claude-haiku-4-5", "claude-opus-4-1"] } };
+const defaultModel: Record<ProviderId, string> = { openai: "gpt-4.1-mini", gemini: "gemini-3.8-flash", anthropic: "claude-sonnet-4-5" };
 
 export default function InterviewWorkspace({ idea, onExit }: { idea: string; onExit: () => void }) {
   const [turns, setTurns] = useState<InterviewTurn[]>([]);
