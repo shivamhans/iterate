@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { listProjects, removeProject, saveProject, type StoredProject } from "./lib/projectStorage";
 import {
   ArrowUpRight, ArrowRight, Bell, Bot, Check, ChevronDown,
   Compass, FileText, FolderKanban, Gauge, ImagePlus, Layers3,
@@ -7,12 +8,7 @@ import {
 } from "lucide-react";
 import "./styles.css";
 
-type Project = { id: string; name: string; kind: string; updated: string; status: string; icon: string };
-const starterProjects: Project[] = [
-  { id: "p1", name: "Personal finance dashboard", kind: "Web application", updated: "Edited 2 hours ago", status: "In progress", icon: "◈" },
-  { id: "p2", name: "Creator launch strategy", kind: "Business", updated: "Edited yesterday", status: "Prompt ready", icon: "✳" },
-  { id: "p3", name: "Study companion", kind: "Mobile application", updated: "Edited 3 days ago", status: "Specification", icon: "⌘" }
-];
+type Project = StoredProject;
 
 const navItems = [
   { label: "Dashboard", icon: Compass },
@@ -25,7 +21,9 @@ const navItems = [
 function App() {
   const [active, setActive] = useState("Dashboard");
   const [idea, setIdea] = useState("");
-  const [projects, setProjects] = useState<Project[]>(starterProjects);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [projectsLoading, setProjectsLoading] = useState(true);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [showNew, setShowNew] = useState(false);
@@ -33,26 +31,75 @@ function App() {
   const [toast, setToast] = useState("");
   const filtered = useMemo(() => projects.filter(p => p.name.toLowerCase().includes(search.toLowerCase())), [projects, search]);
 
-  function startIteration() {
+  useEffect(() => {
+    let mounted = true;
+    listProjects().then(items => { if (mounted) setProjects(items); }).catch(error => {
+      if (mounted) setToast(error instanceof Error ? error.message : "Could not load local projects.");
+    }).finally(() => { if (mounted) setProjectsLoading(false); });
+    return () => { mounted = false; };
+  }, []);
+
+  function notify(message: string) {
+    setToast(message);
+    window.setTimeout(() => setToast(""), 3200);
+  }
+
+  function openProject(project: Project) {
+    setEditingProject(project);
+    setIdea(project.initialIdea);
+    setShowNew(true);
+  }
+
+  async function deleteCurrentProject() {
+    if (!editingProject) return;
+    if (!window.confirm(`Delete “${editingProject.name}”? This cannot be undone.`)) return;
+    try {
+      await removeProject(editingProject.id);
+      setProjects(current => current.filter(project => project.id !== editingProject.id));
+      setEditingProject(null);
+      setShowNew(false);
+      setIdea("");
+      notify("Project deleted from this device.");
+    } catch (error) {
+      notify(error instanceof Error ? error.message : "Could not delete this project.");
+    }
+  }
+
+  async function startIteration() {
     if (!idea.trim()) {
       setToast("Add a few words about your idea to get started.");
       window.setTimeout(() => setToast(""), 2600);
       return;
     }
-    const project: Project = {
+    const now = Date.now();
+    const project: Project = editingProject ? {
+      ...editingProject,
+      name: idea.trim().replace(/\\s+/g, " ").slice(0, 48),
+      initialIdea: idea.trim(),
+      updated: "Just updated",
+      updatedAt: now
+    } : {
       id: crypto.randomUUID(),
-      name: idea.trim().slice(0, 48),
+      name: idea.trim().replace(/\\s+/g, " ").slice(0, 48),
       kind: "New idea",
       updated: "Just created",
-      status: "Ready to refine",
-      icon: "✳"
+      status: "Draft",
+      icon: "✳",
+      initialIdea: idea.trim(),
+      createdAt: now,
+      updatedAt: now
     };
-    setProjects(current => [project, ...current]);
-    setIdea("");
-    setShowNew(false);
-    setActive("New iteration");
-    setToast("Your idea has been saved locally. Connect an AI provider to begin the interview.");
-    window.setTimeout(() => setToast(""), 4200);
+    try {
+      await saveProject(project);
+      setProjects(current => [project, ...current.filter(item => item.id !== project.id)].sort((a,b) => b.updatedAt - a.updatedAt));
+      setIdea("");
+      setShowNew(false);
+      setEditingProject(null);
+      setActive("My projects");
+      notify(editingProject ? "Project updated and saved on this device." : "Project created and saved on this device.");
+    } catch (error) {
+      notify(error instanceof Error ? error.message : "Could not save this project. Please try again.");
+    }
   }
 
 
