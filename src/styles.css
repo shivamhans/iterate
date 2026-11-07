@@ -172,7 +172,8 @@ body:has(.popup-shell) { min-height:420px; overflow:hidden; }
 .popup-glow{position:absolute;z-index:-1;width:240px;height:240px;right:-120px;top:80px;border-radius:50%;background:rgba(137,66,207,.24);filter:blur(65px);pointer-events:none}
 .popup-brand{display:flex;align-items:center;gap:9px;margin:0 0 23px;font:800 20px Manrope,sans-serif;letter-spacing:-.8px;color:#fff}
 .popup-brand .brand-mark{width:21px;height:21px;transform:scale(.86);transform-origin:left center}
-.brand-initial{font-size:.72em;vertical-align:baseline;display:inline-block;transform:translateY(-.04em);letter-spacing:-.08em}
+.brand-initial{font-size:.54em;vertical-align:baseline;display:inline-block;transform:translateY(-.13em);letter-spacing:-.08em}
+.brand-name .brand-initial,.popup-brand .brand-initial{font-size:.54em;line-height:1;}
 .popup-shell .eyebrow{font-size:9px;letter-spacing:1.2px;white-space:nowrap;margin-bottom:11px}
 .popup-shell h1{font:800 28px/1.14 Manrope,sans-serif;letter-spacing:-1.1px;margin:0 0 8px}
 .popup-shell>p{font-size:12px;line-height:1.5;color:#b6a9c5;margin:0 0 17px}
