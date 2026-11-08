@@ -6,6 +6,16 @@ Iterate is a local-first Chrome extension for thinking through an idea before as
 
 > **Project status:** Active development / pre-release. The current branch contains the local project workspace, provider settings, direct provider adapters, an adaptive interview, saved interview progress, background-in-tab continuity, and project status indicators. The full specification editor, prompt-generation studio, image analysis, automatic version history, and robust export/import workflow are not yet complete. Do not treat this repository as a finished production release.
 
+## Interface preview
+
+The screenshots below show the current Iterate workspace, including the dashboard, project library, adaptive interview, AI provider settings, and Prompt Studio.
+
+<p align="center">
+  <img src="docs/screenshots/overview.jpg" alt="Iterate interface overview showing the dashboard, projects, interview, AI providers, and Prompt Studio" width="900" />
+</p>
+
+<sub>Current development UI · Screenshots captured November 8, 2026</sub>
+
 ## Contents
 
 - [Why Iterate](#why-iterate)
