@@ -1,40 +1,40 @@
-# Iterate
+# iterate
 
 **Turn rough ideas into clear requirements, structured specifications, and AI-ready prompts.**
 
-Iterate is a local-first Chrome extension for thinking through an idea before asking an AI to build, write, design, or research it. It guides users through an adaptive, one-question-at-a-time interview and keeps project data in the browser.
+iterate is a local-first Chrome extension for thinking through an idea before asking an AI to build, write, design, or research it. It guides users through an adaptive, one-question-at-a-time interview and keeps project data in the browser.
 
 > **Project status:** Active development / pre-release. The current branch contains the local project workspace, provider settings, direct provider adapters, an adaptive interview, saved interview progress, background-in-tab continuity, and project status indicators. The full specification editor, prompt-generation studio, image analysis, automatic version history, and robust export/import workflow are not yet complete. Do not treat this repository as a finished production release.
 
 ## Interface preview
 
-The screenshots below show the current Iterate workspace, including the dashboard, project library, adaptive interview, AI provider settings, and Prompt Studio.
+The screenshots below show the current iterate workspace, including the dashboard, project library, adaptive interview, AI provider settings, and Prompt Studio.
 
 **Dashboard**
 <p align="center">
-  <img src="docs/screenshots/dashboard.png" alt="Iterate interface overview showing the dashboard." width="900" />
+  <img src="docs/screenshots/dashboard.png" alt="iterate interface overview showing the dashboard." width="900" />
 </p>
 
 **Projects**
 <p align="center">
-  <img src="docs/screenshots/projects.png" alt="Iterate interface overview showing the projects." width="900" />
+  <img src="docs/screenshots/projects.png" alt="iterate interface overview showing the projects." width="900" />
 </p>
 
 **Interview**
 <p align="center">
-  <img src="docs/screenshots/iterate.png" alt="Iterate interface overview showing the interview." width="900" />
+  <img src="docs/screenshots/iterate.png" alt="iterate interface overview showing the interview." width="900" />
 </p>
 
 **AI Providers**
 <p align="center">
-  <img src="docs/screenshots/provider.png" alt="Iterate interface overview showing the dashboard, projects, interview, AI providers, and Prompt Studio" width="900" />
+  <img src="docs/screenshots/provider.png" alt="iterate interface overview showing the dashboard, projects, interview, AI providers, and Prompt Studio" width="900" />
 </p>
 
 <sub>Current development UI · Screenshots captured November 8, 2026</sub>
 
 ## Contents
 
-- [Why Iterate](#why-iterate)
+- [Why iterate](#why-iterate)
 - [Features](#features)
 - [Current limitations](#current-limitations)
 - [Technology](#technology)
@@ -49,9 +49,9 @@ The screenshots below show the current Iterate workspace, including the dashboar
 - [Contributing](#contributing)
 - [License](#license)
 
-## Why Iterate
+## Why iterate
 
-A short prompt often hides important decisions: who the product is for, what problem it solves, which workflows matter, what constraints apply, and what a successful result looks like. Iterate is designed to surface those decisions before generating the final instructions.
+A short prompt often hides important decisions: who the product is for, what problem it solves, which workflows matter, what constraints apply, and what a successful result looks like. iterate is designed to surface those decisions before generating the final instructions.
 
 The intended workflow is:
 
@@ -71,7 +71,7 @@ The intended workflow is:
 - IndexedDB-backed project storage.
 - Bring Your Own Key settings for OpenAI, Google Gemini, and Anthropic.
 - Automatic or manually selected model configuration.
-- Direct browser-to-provider requests; no Iterate application server.
+- Direct browser-to-provider requests; no iterate application server.
 - Adaptive interview with one question per turn, multiple-choice options, custom answers, and a dynamic completion recommendation.
 - Interview progress saved with the local project.
 - Interview view remains mounted when navigating between workspace sections in the same open extension page.
@@ -114,7 +114,7 @@ These items are product goals, not claims of functionality in the current build:
 
 ## Architecture and privacy
 
-Iterate is designed to run inside the user's browser. There is no Iterate-owned backend, hosted project database, account system, or cloud synchronization service in v1.
+iterate is designed to run inside the user's browser. There is no iterate-owned backend, hosted project database, account system, or cloud synchronization service in v1.
 
 **Data flow**
 
@@ -122,7 +122,7 @@ Iterate is designed to run inside the user's browser. There is no Iterate-owned 
 User idea
    |
    v
-Iterate extension workspace
+iterate extension workspace
    |
    +----> IndexedDB (local projects and interview checkpoints)
    |
@@ -141,7 +141,7 @@ Local project checkpoint
 - Project data is stored in the browser profile's IndexedDB.
 - Provider configuration and keys are stored in Chrome extension local storage.
 - AI requests go directly to the provider selected by the user.
-- Iterate does not receive or proxy provider keys or prompts through an Iterate server.
+- iterate does not receive or proxy provider keys or prompts through an iterate server.
 - No analytics or telemetry are intentionally included.
 - No automatic provider fallback is performed.
 - No website content is collected by content scripts as part of the core workflow.
@@ -158,10 +158,10 @@ A ChatGPT subscription does **not** include OpenAI API credit. API access and bi
 
 ### Model selection
 
-- **Automatic:** Iterate uses its configured default model for that provider.
+- **Automatic:** iterate uses its configured default model for that provider.
 - **Manual:** Enter a model ID supported by your provider account.
 - **Change model:** When an interview request fails, select another saved provider/model for that retry. This does not silently change the default provider selection.
-- **No fallback:** Iterate does not send your prompt to another provider unless you explicitly select that provider.
+- **No fallback:** iterate does not send your prompt to another provider unless you explicitly select that provider.
 
 Model availability changes. Check the provider's current model documentation if a model returns a not-found or access error.
 
@@ -206,9 +206,9 @@ Model availability changes. Check the provider's current model documentation if 
    - Enable **Developer mode**.
    - Select **Load unpacked**.
    - Choose the generated `dist/` directory (not the repository root).
-   - Pin Iterate from Chrome's Extensions menu if desired.
+   - Pin iterate from Chrome's Extensions menu if desired.
 
-6. After source changes, run `npm run build`, then click **Reload** on the Iterate card in `chrome://extensions`. Refresh any already-open Iterate workspace page.
+6. After source changes, run `npm run build`, then click **Reload** on the iterate card in `chrome://extensions`. Refresh any already-open iterate workspace page.
 
 ## Development
 
@@ -224,7 +224,7 @@ The production extension output is written to `dist/`. For extension-specific be
 
 ## How to use
 
-1. Open Iterate from the Chrome toolbar.
+1. Open iterate from the Chrome toolbar.
 2. Open the full workspace.
 3. Go to **AI providers**.
 4. Add an API key for a provider, test the connection, save it, and select that provider.
@@ -260,7 +260,7 @@ For development testing, open the extension page's DevTools → **Application** 
 
 - Never commit API keys, tokens, or personal project data.
 - Do not paste API keys into bug reports, screenshots, or public discussions.
-- Keys in `chrome.storage.local` are not encrypted by Iterate and are not stored in a hardware-backed vault. Use a trusted, protected browser profile.
+- Keys in `chrome.storage.local` are not encrypted by iterate and are not stored in a hardware-backed vault. Use a trusted, protected browser profile.
 - Review each provider's data handling, retention, and billing terms before sending project information.
 - Do not send confidential or regulated data unless you have confirmed the provider and your organization's policies permit it.
 - Report suspected security vulnerabilities privately to the repository maintainer rather than opening a public issue containing exploit details.
@@ -277,8 +277,8 @@ Contributions, bug reports, and focused improvement proposals are welcome.
 
 ## License
 
-Iterate is licensed under the [MIT License](LICENSE).
+iterate is licensed under the [MIT License](LICENSE).
 
 ---
 
-Built for clearer thinking. **Iterate.**
+Built for clearer thinking. **iterate.**

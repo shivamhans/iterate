@@ -93,9 +93,9 @@ function App() {
   }, [interviewProject?.id]);
 
   const notifyInterviewReady = useCallback((projectName: string) => {
-    notify(`Iterate has a new question ready for ${projectName}.`);
+    notify(`iterate has a new question ready for ${projectName}.`);
     if (typeof chrome !== "undefined" && chrome.notifications?.create) {
-      chrome.notifications.create(`iterate-${Date.now()}`, { type: "basic", iconUrl: "icon.svg", title: "Iterate · Ready for you", message: `Your interview for “${projectName}” has a new step.`, priority: 1 });
+      chrome.notifications.create(`iterate-${Date.now()}`, { type: "basic", iconUrl: "icon.svg", title: "iterate · Ready for you", message: `Your interview for “${projectName}” has a new step.`, priority: 1 });
     }
   }, []);
 
@@ -201,7 +201,7 @@ function App() {
           </div>
           <button className="nav-item settings-link" onClick={() => setActive("Settings")}><Settings2 size={17}/><span>Settings</span></button>
           <div className="profile-row">
-            <div className="avatar">I</div><div className="profile-copy"><strong>Local workspace</strong><span>Personal account · On device</span></div><MoreHorizontal size={17} className="muted-icon"/>
+            <div className="avatar">i</div><div className="profile-copy"><strong>Local workspace</strong><span>Personal account · On device</span></div><MoreHorizontal size={17} className="muted-icon"/>
           </div>
         </aside>
 
@@ -212,7 +212,7 @@ function App() {
             <div className="top-actions">
               <button className="search-trigger" onClick={() => setShowSearch(v => !v)}><Search size={15}/><span>Search projects</span><kbd>⌘ K</kbd></button>
               <button className="icon-button notification-button" aria-label="Notifications"><Bell size={17}/><i/></button>
-              <button className="top-avatar">I</button>
+              <button className="top-avatar">i</button>
             </div>
           </header>
 
@@ -260,7 +260,7 @@ function App() {
                   <button className="new-project-row" onClick={beginNewProject}><span><Plus size={16}/></span> Start with a new idea</button>
                 </div>
                 <div className="panel glass-card insight-panel">
-                  <div className="panel-heading"><div><div className="section-kicker">A BETTER WAY TO THINK</div><h3>How Iterate works</h3></div><div className="mini-spark"><Sparkles size={16}/></div></div>
+                  <div className="panel-heading"><div><div className="section-kicker">A BETTER WAY TO THINK</div><h3>How iterate works</h3></div><div className="mini-spark"><Sparkles size={16}/></div></div>
                   <div className="flow-steps">
                     <FlowStep number="01" title="Bring the rough idea" text="Start anywhere. A sentence is plenty."/>
                     <FlowStep number="02" title="Explore what matters" text="A thoughtful AI interview fills in the gaps."/>
@@ -269,7 +269,7 @@ function App() {
                   <button className="learn-link" onClick={() => setActive("New iteration")}>Explore the workflow <ArrowRight size={14}/></button>
                 </div>
               </section>
-              <footer className="dashboard-footer"><span>ITERATE <b>·</b> THINK IT THROUGH.</span><span><ShieldCheck size={13}/> Local-first by design</span></footer>
+              <footer className="dashboard-footer"><span>iterate <b>·</b> THINK IT THROUGH.</span><span><ShieldCheck size={13}/> Local-first by design</span></footer>
             </>}
 
             {active === "My projects" && <section className="subpage">
@@ -294,7 +294,7 @@ function App() {
 
             {active === "AI providers" && <section className="subpage"><div className="page-heading"><div><div className="eyebrow">YOUR AI, YOUR CHOICE</div><h1>AI <span>providers.</span></h1><p>Connect your own API keys. Requests go directly from this extension to your selected provider.</p></div></div><ProviderSettingsPanel/></section>}
 
-            {active === "Settings" && <section className="subpage"><div className="page-heading"><div><div className="eyebrow">MAKE ITERATE YOURS</div><h1>Your <span>settings.</span></h1><p>Local preferences and data controls.</p></div></div><div className="settings-card glass-card"><div className="settings-line"><div><strong>Workspace storage</strong><span>Projects and images are stored in this browser.</span></div><span className="local-pill"><span/> On device</span></div><div className="settings-line"><div><strong>Analytics and telemetry</strong><span>Disabled in v1. No usage tracking.</span></div><span className="local-pill">Off</span></div><div className="settings-line"><div><strong>Provider fallback</strong><span>Iterate will never switch providers automatically.</span></div><span className="local-pill">Manual</span></div><div className="settings-line"><div><strong>Backup and restore</strong><span>Manual JSON project export and import.</span></div><button className="secondary-button" onClick={()=>setToast("Backup tools are being built next.")}>Manage backups</button></div></div></section>}
+            {active === "Settings" && <section className="subpage"><div className="page-heading"><div><div className="eyebrow">MAKE iterate YOURS</div><h1>Your <span>settings.</span></h1><p>Local preferences and data controls.</p></div></div><div className="settings-card glass-card"><div className="settings-line"><div><strong>Workspace storage</strong><span>Projects and images are stored in this browser.</span></div><span className="local-pill"><span/> On device</span></div><div className="settings-line"><div><strong>Analytics and telemetry</strong><span>Disabled in v1. No usage tracking.</span></div><span className="local-pill">Off</span></div><div className="settings-line"><div><strong>Provider fallback</strong><span>iterate will never switch providers automatically.</span></div><span className="local-pill">Manual</span></div><div className="settings-line"><div><strong>Backup and restore</strong><span>Manual JSON project export and import.</span></div><button className="secondary-button" onClick={()=>setToast("Backup tools are being built next.")}>Manage backups</button></div></div></section>}
           </div>
         </main>
       </div>
