@@ -10,8 +10,24 @@ Iterate is a local-first Chrome extension for thinking through an idea before as
 
 The screenshots below show the current Iterate workspace, including the dashboard, project library, adaptive interview, AI provider settings, and Prompt Studio.
 
+**Dashboard**
 <p align="center">
-  <img src="docs/screenshots/combined-image.jpg" alt="Iterate interface overview showing the dashboard, projects, interview, AI providers, and Prompt Studio" width="900" />
+  <img src="docs/screenshots/dashboard.png" alt="Iterate interface overview showing the dashboard." width="900" />
+</p>
+
+**Projects**
+<p align="center">
+  <img src="docs/screenshots/projects.png" alt="Iterate interface overview showing the projects." width="900" />
+</p>
+
+**Interview**
+<p align="center">
+  <img src="docs/screenshots/iterate.png" alt="Iterate interface overview showing the interview." width="900" />
+</p>
+
+**AI Providers**
+<p align="center">
+  <img src="docs/screenshots/provider.png" alt="Iterate interface overview showing the dashboard, projects, interview, AI providers, and Prompt Studio" width="900" />
 </p>
 
 <sub>Current development UI · Screenshots captured November 8, 2026</sub>
