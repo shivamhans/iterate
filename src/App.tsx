@@ -99,19 +99,27 @@ function App() {
     }
   }, []);
 
-  async function deleteCurrentProject() {
-    if (!editingProject) return;
-    if (!window.confirm(`Delete “${editingProject.name}”? This cannot be undone.`)) return;
+  async function deleteProjectById(project: Project) {
+    if (!window.confirm(`Delete “${project.name}”? This cannot be undone.`)) return;
     try {
-      await removeProject(editingProject.id);
-      setProjects(current => current.filter(project => project.id !== editingProject.id));
-      setEditingProject(null);
+      await removeProject(project.id);
+      setProjects(current => current.filter(item => item.id !== project.id));
+      if (editingProject?.id === project.id) setEditingProject(null);
+      if (interviewProject?.id === project.id) {
+        setInterviewProject(null);
+        setInterviewIdea("");
+        setActive("My projects");
+      }
       setShowNew(false);
       setIdea("");
       notify("Project deleted from this device.");
     } catch (error) {
       notify(error instanceof Error ? error.message : "Could not delete this project.");
     }
+  }
+
+  async function deleteCurrentProject() {
+    if (editingProject) await deleteProjectById(editingProject);
   }
 
   async function startIteration() {
@@ -267,7 +275,7 @@ function App() {
             {active === "My projects" && <section className="subpage">
               <div className="page-heading"><div><div className="eyebrow">YOUR WORK, ALL IN ONE PLACE</div><h1>My <span>projects.</span></h1><p>Every idea has a place to grow.</p></div><button className="primary-button" onClick={beginNewProject}><Plus size={16}/> New project</button></div>
               <div className="filter-row"><div className="search-field"><Search size={16}/><input placeholder="Find a project..." value={search} onChange={e => setSearch(e.target.value)}/></div><button className="filter-button">Recently edited <ChevronDown size={14}/></button></div>
-              <div className="projects-grid">{filtered.map((p,i)=><ProjectCard key={p.id} project={p} index={i} onOpen={() => openProject(p)}/>)}</div>
+              <div className="projects-grid">{filtered.map((p,i)=><ProjectCard key={p.id} project={p} index={i} onOpen={() => openProject(p)} onDelete={() => deleteProjectById(p)}/>)}</div>
               {!projectsLoading && filtered.length===0 && <div className="empty-state"><FolderKanban size={25}/><h3>{search ? "No projects found" : "Your workspace is ready"}</h3><p>{search ? "Try another search or start a new idea." : "Create your first project to give your idea a home."}</p><button className="primary-button" onClick={beginNewProject}><Plus size={15}/> Create your first project</button></div>}
               {projectsLoading && <div className="empty-state"><p>Loading your local projects…</p></div>}
             </section>}
@@ -305,8 +313,15 @@ function Metric({icon,label,value,note,tone}:{icon:React.ReactNode;label:string;
 function ProjectRow({project,index,onOpen}:{project:Project;index:number;onOpen:()=>void}) {
   return <button className="project-row" onClick={onOpen}><div className={`project-icon project-tone-${index%3}`}>{project.icon}</div><div className="project-details"><strong>{project.name}</strong><span>{project.kind} <i>·</i> {project.updated}</span></div><span className={`status-pill ${project.status==="Prompt ready"?"ready":project.status==="Thinking"?"thinking":project.status==="Question ready"?"waiting":project.status==="Ready for review"?"ready":project.status==="Needs attention"?"attention":""}`}>{project.status}</span><ArrowUpRight size={16} className="row-arrow"/></button>;
 }
-function ProjectCard({project,index,onOpen}:{project:Project;index:number;onOpen:()=>void}) {
-  return <button className="project-card glass-card" onClick={onOpen}><div className="project-card-top"><div className={`project-icon project-tone-${index%3}`}>{project.icon}</div><MoreHorizontal size={18}/></div><h3>{project.name}</h3><p>{project.kind}</p><div className="project-card-bottom"><span className={`status-pill ${project.status==="Thinking"?"thinking":project.status==="Question ready"?"waiting":project.status==="Ready for review"?"ready":project.status==="Needs attention"?"attention":""}`}>{project.status}</span><span>{project.updated}</span></div></button>;
+function ProjectCard({project,index,onOpen,onDelete}:{project:Project;index:number;onOpen:()=>void;onDelete:()=>void}) {
+  return <article className="project-card glass-card project-card-shell">
+    <button className="project-card-open" onClick={onOpen} aria-label={`Open project ${project.name}`}>
+      <div className="project-card-top"><div className={`project-icon project-tone-${index%3}`}>{project.icon}</div></div>
+      <h3>{project.name}</h3><p>{project.kind}</p>
+      <div className="project-card-bottom"><span className={`status-pill ${project.status==="Thinking"?"thinking":project.status==="Question ready"?"waiting":project.status==="Ready for review"?"ready":project.status==="Needs attention"?"attention":""}`}>{project.status}</span><span>{project.updated}</span></div>
+    </button>
+    <button className="project-card-delete" onClick={onDelete} aria-label={`Delete project ${project.name}`} title="Delete project"><X size={16}/></button>
+  </article>;
 }
 function FlowStep({number,title,text}:{number:string;title:string;text:string}) {
   return <div className="flow-step"><span className="flow-number">{number}</span><div><strong>{title}</strong><p>{text}</p></div><Check size={14} className="flow-check"/></div>;
