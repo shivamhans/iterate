@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Iterate — AI Prompt Refiner",
+  "version": "0.1.0",
+  "description": "Turn rough ideas into complete, AI-ready prompts.",
+  "action": {
+    "default_title": "Open Iterate",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "storage",
+    "notifications"
+  ],
+  "background": {
+    "service_worker": "service-worker.js",
+    "type": "module"
+  },
+  "icons": {
+    "128": "icon.svg"
+  },
+  "host_permissions": [
+    "https://api.openai.com/*",
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.anthropic.com/*"
+  ]
+}
